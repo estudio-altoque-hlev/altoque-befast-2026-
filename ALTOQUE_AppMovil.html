@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ALTOQUE">
+<meta name="theme-color" content="#1a3a5c">
+<title>ALTOQUE – Formulario ALTOQUE-01</title>
+<style>
+  :root {
+    --navy: #1a3a5c;
+    --navy-dark: #0f2540;
+    --teal: #0d7c8f;
+    --teal-light: #12a3ba;
+    --accent: #c0392b;
+    --accent-light: #e74c3c;
+    --green: #2a8a4a;
+    --red: #c0392b;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --border: #d0dce8;
+    --text: #1a2535;
+    --text-muted: #5a6a7e;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(26,58,92,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 90px;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--navy-dark) 0%, #8B1A1A 60%, var(--accent) 100%);
+    color: white;
+    padding: 16px 18px 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.22);
+  }
+  .header-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .header-badge {
+    background: #f5b840;
+    color: var(--navy-dark);
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+  }
+  .header h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
+  .header-sub { font-size: 11px; opacity: 0.78; line-height: 1.4; }
+  .step-bar { display: flex; gap: 4px; margin-top: 10px; }
+  .step-dot { flex: 1; height: 3px; background: rgba(255,255,255,0.25); border-radius: 2px; transition: background 0.3s; }
+  .step-dot.done { background: #f5b840; }
+  .step-dot.active { background: white; }
+
+  /* SCREENS */
+  .screen { display: none; }
+  .screen.active { display: block; padding: 16px; }
+
+  /* CARDS */
+  .card { background: var(--card); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--teal); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; width: 3px; height: 14px; background: var(--teal); border-radius: 2px; display: inline-block; }
+
+  /* FORM FIELDS */
+  label { font-size: 13px; font-weight: 600; color: var(--text); display: block; margin-bottom: 5px; }
+  .hint { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-style: italic; }
+  input[type="text"], input[type="number"], input[type="time"], input[type="date"], select, textarea {
+    width: 100%; padding: 11px 13px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 15px; color: var(--text); background: #f8fafc;
+    appearance: none; -webkit-appearance: none; outline: none; transition: border-color 0.2s; margin-bottom: 12px;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--teal); background: #fff; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  textarea { resize: vertical; min-height: 70px; }
+
+  /* TOGGLE Sí/No/NE */
+  .toggle-group { display: flex; gap: 8px; margin-bottom: 4px; }
+  .toggle-btn {
+    flex: 1; padding: 10px 6px; border: 2px solid var(--border); border-radius: 8px;
+    background: #f8fafc; font-size: 14px; font-weight: 600; color: var(--text-muted);
+    cursor: pointer; text-align: center; transition: all 0.18s; user-select: none;
+  }
+  .toggle-btn:active { transform: scale(0.96); }
+  .toggle-btn.selected-si { background: var(--green); border-color: var(--green); color: white; }
+  .toggle-btn.selected-no { background: #e74c3c; border-color: #c0392b; color: white; }
+  .toggle-btn.selected-ne { background: #95a5a6; border-color: #7f8c8d; color: white; }
+
+  /* ITEM CARDS */
+  .item-card {
+    background: var(--card); border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+    box-shadow: var(--shadow); border: 1px solid var(--border); border-left: 5px solid var(--teal);
+    transition: border-left-color 0.2s;
+  }
+  .item-card.answered-si { border-left-color: var(--green); }
+  .item-card.answered-no { border-left-color: #e74c3c; }
+  .item-card.answered-ne { border-left-color: #95a5a6; }
+  .item-letter {
+    display: inline-block; background: #8B1A1A; color: white;
+    font-size: 15px; font-weight: 800; border-radius: 8px;
+    text-align: center; line-height: 34px; margin-bottom: 10px;
+    padding: 0 12px; height: 34px; min-width: 34px;
+  }
+  .item-name { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 5px; }
+  .item-desc {
+    font-size: 12px; color: var(--text-muted); line-height: 1.55; margin-bottom: 12px;
+    background: #f4f7fb; padding: 9px 11px; border-radius: 7px;
+  }
+  .item-score { font-size: 11px; color: #8B1A1A; font-weight: 700; margin-top: 8px; text-align: right; }
+
+  /* CHECKBOXES */
+  .check-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer; }
+  .check-box { width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 5px; background: #f8fafc; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+  .check-box.checked { background: var(--teal); border-color: var(--teal); }
+  .check-box.checked::after { content: '✓'; color: white; font-size: 14px; font-weight: 700; }
+  .check-label { font-size: 13px; color: var(--text); }
+
+  /* SCORE BOX */
+  .score-box {
+    background: linear-gradient(135deg, var(--navy), #8B1A1A);
+    color: white; border-radius: var(--radius); padding: 20px; text-align: center;
+    margin: 16px 0; box-shadow: 0 4px 20px rgba(139,26,26,0.30);
+  }
+  .score-number { font-size: 56px; font-weight: 800; line-height: 1; }
+  .score-label { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+  .result-badge { display: inline-block; font-size: 20px; font-weight: 800; padding: 10px 28px; border-radius: 30px; margin-top: 14px; letter-spacing: 1px; }
+  .result-positive { background: var(--green); }
+  .result-negative { background: #e74c3c; }
+
+  /* BUTTONS */
+  .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.18s; letter-spacing: 0.3px; margin-bottom: 10px; }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--teal); color: white; }
+  .btn-secondary { background: var(--navy); color: white; }
+  .btn-accent { background: #f5b840; color: var(--navy-dark); }
+  .btn-outline { background: transparent; color: var(--teal); border: 2px solid var(--teal); }
+  .btn-danger { background: #e74c3c; color: white; }
+  .btn-success { background: var(--green); color: white; }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; background: white;
+    border-top: 1px solid var(--border); display: flex; gap: 10px;
+    padding: 12px 16px; box-shadow: 0 -4px 16px rgba(0,0,0,0.08); z-index: 100;
+  }
+  .bottom-nav .btn { margin: 0; }
+
+  /* ALERTS */
+  .alert { padding: 12px 14px; border-radius: 9px; font-size: 13px; margin-bottom: 12px; line-height: 1.5; font-weight: 500; }
+  .alert-warning { background: #fff3cd; border: 1px solid #f5b840; color: #7a4f00; }
+  .alert-info { background: #d1ecf1; border: 1px solid #0d7c8f; color: #0a4a55; }
+  .alert-success { background: #d4edda; border: 1px solid #2a8a4a; color: #155724; }
+  .alert-danger { background: #f8d7da; border: 1px solid #c0392b; color: #721c24; }
+
+  /* RECORDS */
+  .record-item { background: white; border-radius: 10px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .record-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .record-id { font-size: 13px; font-weight: 700; color: var(--navy); }
+  .record-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .badge-pos { background: #d4edda; color: #155724; }
+  .badge-neg { background: #f8d7da; color: #721c24; }
+  .record-detail { font-size: 12px; color: var(--text-muted); }
+  .record-score { font-size: 14px; font-weight: 700; color: #8B1A1A; margin-top: 4px; }
+
+  .sep { height: 1px; background: var(--border); margin: 14px 0; }
+  .install-banner { background: linear-gradient(135deg, #f5b840, #f5ca70); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+  .install-icon { font-size: 28px; }
+  .install-text h3 { font-size: 14px; font-weight: 700; color: var(--navy-dark); }
+  .install-text p { font-size: 12px; color: var(--navy); margin-top: 2px; }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+  .nav-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .nav-tab { flex: 1; padding: 8px; border: 1.5px solid var(--border); border-radius: 8px; background: white; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; text-align: center; transition: all 0.15s; }
+  .nav-tab.active { background: var(--navy); color: white; border-color: var(--navy); }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN OVERLAY ──────────────────────────────────────────── -->
+<div id="loginOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,37,64,0.97);z-index:9999;flex-direction:column;align-items:center;justify-content:center;padding:24px;">
+  <div style="width:100%;max-width:420px;background:white;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.4);">
+    <div style="background:linear-gradient(135deg,#0f2540,#1a3a5c);padding:22px 20px 18px;">
+      <div style="font-size:11px;font-weight:800;color:#f5b840;letter-spacing:1px;margin-bottom:6px;">ESTUDIO ALTOQUE vs. BEFAST 2026</div>
+      <div style="font-size:20px;font-weight:700;color:white;">Identificación del evaluador</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:4px;">Hospital Lima Este Vitarte · Solo necesitas hacerlo una vez en este dispositivo</div>
+    </div>
+    <div style="padding:20px;">
+      <label style="font-size:13px;font-weight:600;color:#1a2535;display:block;margin-bottom:5px;">Correo Gmail institucional o personal</label>
+      <input type="email" id="loginEmail" placeholder="tucorreo@gmail.com"
+        style="width:100%;padding:12px 14px;border:1.5px solid #d0dce8;border-radius:8px;font-size:15px;margin-bottom:14px;outline:none;box-sizing:border-box;">
+
+      <label style="font-size:13px;font-weight:600;color:#1a2535;display:block;margin-bottom:5px;">Nombre completo</label>
+      <input type="text" id="loginName" placeholder="Dr. / Dra. Apellido Nombre"
+        style="width:100%;padding:12px 14px;border:1.5px solid #d0dce8;border-radius:8px;font-size:15px;margin-bottom:14px;outline:none;box-sizing:border-box;">
+
+      <label style="font-size:13px;font-weight:600;color:#1a2535;display:block;margin-bottom:5px;">Rol en el estudio</label>
+      <select id="loginRole"
+        style="width:100%;padding:12px 14px;border:1.5px solid #d0dce8;border-radius:8px;font-size:15px;margin-bottom:6px;outline:none;background:#f8fafc;box-sizing:border-box;appearance:none;">
+        <option value="">Seleccionar...</option>
+        <option value="EVALT" selected>Evaluador ALTOQUE</option>
+        <option value="EVBEF">Evaluador BEFAST</option>
+        <option value="NEU">Neurólogo consultor</option>
+        <option value="COORD">Coordinador de datos</option>
+        <option value="IP">Investigador Principal</option>
+      </select>
+
+      <div id="loginError" style="font-size:12px;color:#c0392b;min-height:18px;margin-bottom:10px;font-weight:600;"></div>
+
+      <button onclick="submitLogin()"
+        style="width:100%;padding:14px;background:linear-gradient(135deg,#1a3a5c,#0d7c8f);color:white;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;">
+        ✓ Confirmar identidad y continuar
+      </button>
+
+      <div style="font-size:11px;color:#5a6a7e;text-align:center;margin-top:12px;line-height:1.5;">
+        Tu correo se guarda solo en este dispositivo.<br>No se comparte con terceros ni se usa para marketing.
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <span class="header-badge">ALTOQUE-01</span>
+    <h1>Escala ALTOQUE</h1>
+  </div>
+  <div class="header-sub">Hospital Lima Este Vitarte · Estudio ALTOQUE vs. BEFAST 2026<div id="userBadge" style="margin-top:6px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;"></div>
+  <div class="step-bar" id="stepBar">
+    <div class="step-dot" id="dot0"></div>
+    <div class="step-dot" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+    <div class="step-dot" id="dot4"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PANTALLA 0: INICIO ═══════════════════════ -->
+<div class="screen active" id="screen0">
+  <div id="installBanner" class="install-banner" style="display:none;">
+    <div class="install-icon">📲</div>
+    <div class="install-text">
+      <h3>Instalar en tu teléfono</h3>
+      <p>Toca el botón de abajo para añadir esta app a tu pantalla de inicio</p>
+    </div>
+  </div>
+
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab('tabNuevo','tabRegistros',this)">+ Nuevo registro</div>
+    <div class="nav-tab" onclick="switchTab('tabRegistros','tabNuevo',this)">📋 Mis registros</div>
+  </div>
+
+  <div id="tabNuevo">
+    <div class="alert alert-danger">
+      <strong>⚠ Evaluador ALTOQUE:</strong> NO comparta el resultado con el evaluador BEFAST ni con el neurólogo hasta el cierre del formulario. El cegamiento es un requisito del protocolo.
+    </div>
+    <div class="card">
+      <div class="card-title">Identificación del caso</div>
+      <label>ID del Paciente (formato ALTO-2026-NNN)</label>
+      <input type="text" id="s0_id" placeholder="ALTO-2026-001" oninput="this.value=this.value.toUpperCase()">
+      <div class="row2">
+        <div>
+          <label>Fecha</label>
+          <input type="date" id="s0_fecha">
+        </div>
+        <div>
+          <label>Turno</label>
+          <select id="s0_turno">
+            <option value="">Seleccionar...</option>
+            <option>Mañana (07-13)</option>
+            <option>Tarde (13-19)</option>
+            <option>Noche (19-01)</option>
+          </select>
+        </div>
+      </div>
+      <label>Código del evaluador ALTOQUE</label>
+      <input type="text" id="s0_evaluador" placeholder="ej. EVALT-01">
+    </div>
+    <button class="btn btn-primary" onclick="goToScreen(1)">Continuar → Admisión</button>
+  </div>
+
+  <div id="tabRegistros" style="display:none;">
+    <div id="recordsList"></div>
+    <div class="sep"></div>
+    <button class="btn btn-accent" onclick="exportCSV()">⬇ Exportar todos (CSV)</button>
+    <button class="btn btn-outline" onclick="importCSV()">⬆ Importar CSV</button>
+    <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleImport(event)">
+  </div>
+</div>
+
+<!-- ═══════════════════════ PANTALLA 1: ADMISIÓN ═══════════════════════ -->
+<div class="screen" id="screen1">
+  <div class="card">
+    <div class="card-title">Datos de admisión</div>
+    <div class="row2">
+      <div>
+        <label>Hora ingreso</label>
+        <input type="time" id="s1_hora_ingreso">
+      </div>
+      <div>
+        <label>Hora inicio eval.</label>
+        <input type="time" id="s1_hora_ini_eval">
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Hora inicio síntomas</label>
+        <input type="time" id="s1_hora_ini_sint">
+      </div>
+      <div>
+        <label>Modo llegada</label>
+        <select id="s1_modo_llegada">
+          <option value="">Seleccionar...</option>
+          <option>Propio pie</option>
+          <option>Ambulancia</option>
+          <option>Familiar</option>
+        </select>
+      </div>
+    </div>
+    <label>Inicio de síntomas</label>
+    <select id="s1_inicio">
+      <option value="">Seleccionar...</option>
+      <option>Súbito</option>
+      <option>Progresivo</option>
+      <option>Al despertar</option>
+    </select>
+    <label>Actividad al inicio de síntomas</label>
+    <input type="text" id="s1_actividad" placeholder="ej. dormido, caminando...">
+  </div>
+
+  <div class="card">
+    <div class="card-title">Antecedentes relevantes</div>
+    <div class="row2">
+      <div>
+        <label>AIT / Ictus previo</label>
+        <select id="s1_ait">
+          <option value="">—</option>
+          <option>Sí</option>
+          <option>No</option>
+        </select>
+      </div>
+      <div>
+        <label>Fibrilación auricular</label>
+        <select id="s1_fa">
+          <option value="">—</option>
+          <option>Sí</option>
+          <option>No</option>
+          <option>Desconocido</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Anticoag./antiagregantes</label>
+        <select id="s1_anticoag">
+          <option value="">—</option>
+          <option>Sí</option>
+          <option>No</option>
+        </select>
+      </div>
+      <div>
+        <label>Glucemia ingreso (mg/dL)</label>
+        <input type="number" id="s1_glucemia" placeholder="ej. 120">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Criterios de inclusión</div>
+    <div class="hint">Marque todos los que aplican. Si algún criterio de EXCLUSIÓN está presente, suspenda la evaluación y registre el motivo.</div>
+    <div class="check-row" onclick="toggleCheck('cr1')"><div class="check-box" id="cr1"></div><span class="check-label">Paciente adulto (≥ 18 años)</span></div>
+    <div class="check-row" onclick="toggleCheck('cr2')"><div class="check-box" id="cr2"></div><span class="check-label">Síntomas neurológicos focales de inicio agudo</span></div>
+    <div class="check-row" onclick="toggleCheck('cr3')"><div class="check-box" id="cr3"></div><span class="check-label">Tiempo de evolución ≤ 24 horas</span></div>
+    <div class="check-row" onclick="toggleCheck('cr4')"><div class="check-box" id="cr4"></div><span class="check-label">Acompañante disponible o paciente orientado</span></div>
+    <div class="check-row" onclick="toggleCheck('cr5')"><div class="check-box" id="cr5"></div><span class="check-label">Consentimiento informado obtenido (o diferido)</span></div>
+    <label style="margin-top:6px">Motivo de exclusión (si aplica)</label>
+    <input type="text" id="s1_motivo_excl" placeholder="ej. GCS ≤7, ictus previo con déficit permanente...">
+  </div>
+</div>
+
+<!-- ═══════════════════════ PANTALLA 2: ESCALA ALTOQUE ═══════════════════════ -->
+<div class="screen" id="screen2">
+  <div class="alert alert-warning">
+    ⚡ Evalúe cada ítem en orden estricto <strong>A → L → T → O → QUE</strong>. No salte ítems. En caso de duda: marque <strong>Sí</strong> con código OBS_DUDA.
+  </div>
+
+  <!-- A -->
+  <div class="item-card" id="card_A">
+    <div class="item-letter">A</div>
+    <div class="item-name">ASIMETRÍA en el rostro</div>
+    <div class="item-desc">
+      Asimetría facial de inicio agudo. Pida al paciente que sonría o muestre los dientes. Observe caída o desviación de la comisura bucal — evalúa paresia facial central (afecta tercio inferior, NO la frente). Si no puede seguir órdenes verbales, observe asimetría espontánea. <strong>Trampa:</strong> paresia periférica (Bell) afecta toda la hemicara incluyendo la frente.
+    </div>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="btn_A_si" onclick="selectItem('A','si')">✓ Sí</div>
+      <div class="toggle-btn" id="btn_A_no" onclick="selectItem('A','no')">✗ No</div>
+      <div class="toggle-btn" id="btn_A_ne" onclick="selectItem('A','ne')">NE</div>
+    </div>
+    <div class="item-score">Puntuación: 1 punto</div>
+  </div>
+
+  <!-- L -->
+  <div class="item-card" id="card_L">
+    <div class="item-letter">L</div>
+    <div class="item-name">LENGUAJE enredado</div>
+    <div class="item-desc">
+      Dificultad para hablar de inicio agudo. Incluye <em>disartria</em> (habla arrastrada, nasal, ininteligible) y <em>afasia</em> (no encuentra palabras, no comprende órdenes). Pida que diga "el cielo está nublado" y que nombre un lápiz y un reloj. <strong>Trampa:</strong> paciente quechua/aimara puede simular dificultad lingüística — preguntar al acompañante si el habla es diferente a la habitual.
+    </div>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="btn_L_si" onclick="selectItem('L','si')">✓ Sí</div>
+      <div class="toggle-btn" id="btn_L_no" onclick="selectItem('L','no')">✗ No</div>
+      <div class="toggle-btn" id="btn_L_ne" onclick="selectItem('L','ne')">NE</div>
+    </div>
+    <div class="item-score">Puntuación: 1 punto</div>
+  </div>
+
+  <!-- T -->
+  <div class="item-card" id="card_T">
+    <div class="item-letter">T</div>
+    <div class="item-name">TORPEZA en el brazo o pierna</div>
+    <div class="item-desc">
+      Debilidad, entumecimiento o torpeza focal de inicio agudo en brazo y/o pierna. <strong>Prueba de Barré:</strong> "Extienda ambos brazos con los ojos cerrados 10 segundos." Caída >45° = positivo. Luego: "Levante cada pierna a 30° durante 5 segundos." <strong>Trampa:</strong> dolor articular crónico puede limitar el movimiento — preguntar si hay fractura o artritis conocida en ese miembro; si sí, registrar T_DUDOSO en notas.
+    </div>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="btn_T_si" onclick="selectItem('T','si')">✓ Sí</div>
+      <div class="toggle-btn" id="btn_T_no" onclick="selectItem('T','no')">✗ No</div>
+      <div class="toggle-btn" id="btn_T_ne" onclick="selectItem('T','ne')">NE</div>
+    </div>
+    <div class="item-score">Puntuación: 1 punto</div>
+  </div>
+
+  <!-- O -->
+  <div class="item-card" id="card_O">
+    <div class="item-letter">O</div>
+    <div class="item-name">OJOS: visión doble o borrosa</div>
+    <div class="item-desc">
+      Diplopía (visión doble) o pérdida visual en uno o ambos ojos, de inicio agudo. También: desviación conjugada de la mirada o hemianopsia referida. Pregunte: "¿Ve doble ahora?" / "¿Ha perdido visión en algún ojo o lado del campo visual?" Si hay dificultad verbal: tape un ojo y luego el otro — reacción de alarma al tapar el ojo bueno sugiere pérdida visual. <strong>Trampa:</strong> vértigo por laberintitis produce "todo da vueltas" pero NO diplopía ni hemianopsia verdadera → ítem negativo.
+    </div>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="btn_O_si" onclick="selectItem('O','si')">✓ Sí</div>
+      <div class="toggle-btn" id="btn_O_no" onclick="selectItem('O','no')">✗ No</div>
+      <div class="toggle-btn" id="btn_O_ne" onclick="selectItem('O','ne')">NE</div>
+    </div>
+    <div class="item-score">Puntuación: 1 punto</div>
+  </div>
+
+  <!-- QUE -->
+  <div class="item-card" id="card_QUE">
+    <div class="item-letter">QUE</div>
+    <div class="item-name">¡QUE NO TE PUEDAS LEVANTAR!</div>
+    <div class="item-desc">
+      Pérdida súbita del equilibrio o coordinación: incapacidad de mantenerse de pie, inestabilidad de la marcha o caída inexplicada sin pérdida de consciencia previa. <strong>Paso 1 — Interrogatorio:</strong> "¿Desde que empezaron los síntomas le fue imposible ponerse de pie?" Si llegó caminando solo → automáticamente negativo. <strong>Paso 2 (solo si responde Sí o dudoso):</strong> pedir que se siente y, si está estable, que intente ponerse de pie. <strong>Trampa:</strong> vértigo periférico (VPPB) también impide levantarse por náuseas — anotar en notas si hay nistagmo espontáneo o náuseas prominentes.
+    </div>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="btn_QUE_si" onclick="selectItem('QUE','si')">✓ Sí</div>
+      <div class="toggle-btn" id="btn_QUE_no" onclick="selectItem('QUE','no')">✗ No</div>
+      <div class="toggle-btn" id="btn_QUE_ne" onclick="selectItem('QUE','ne')">NE</div>
+    </div>
+    <div class="item-score">Puntuación: 1 punto</div>
+  </div>
+
+  <div class="card">
+    <label>Observaciones / Notas de evaluación</label>
+    <div class="hint">Incluya dudas, ítems NE con motivo (ej. paciente intubado), OBS_DUDA, T_DUDOSO, nistagmo, etc.</div>
+    <textarea id="s2_notas" placeholder="ej. OBS_DUDA ítem T — dolor articular crónico rodilla izquierda..."></textarea>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PANTALLA 3: RESULTADO Y TIEMPOS ═══════════════════════ -->
+<div class="screen" id="screen3">
+  <div class="score-box">
+    <div class="score-label">PUNTUACIÓN TOTAL ALTOQUE</div>
+    <div class="score-number" id="scoreNum">—</div>
+    <div class="score-label">de 5 puntos (A + L + T + O + QUE)</div>
+    <div class="result-badge" id="resultBadge">—</div>
+  </div>
+
+  <div class="alert alert-info">
+    Punto de corte: <strong>≥ 1 punto = POSITIVO</strong> para ictus agudo
+  </div>
+
+  <div class="card">
+    <div class="card-title">Registro de tiempos</div>
+    <div class="row2">
+      <div>
+        <label>Triaje / Código ALTOQUE</label>
+        <input type="time" id="t_triaje">
+      </div>
+      <div>
+        <label>Inicio evaluación ALTOQUE</label>
+        <input type="time" id="t_ini_eval">
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Fin evaluación ALTOQUE</label>
+        <input type="time" id="t_fin_eval">
+      </div>
+      <div>
+        <label>Notificación al neurólogo</label>
+        <input type="time" id="t_neurologo">
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Realización TC / RM</label>
+        <input type="time" id="t_tc">
+      </div>
+      <div>
+        <label>Hora fin formulario</label>
+        <input type="time" id="t_fin_form">
+      </div>
+    </div>
+    <div id="tiempoDelta" class="alert alert-success" style="display:none;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Datos del evaluador</div>
+    <label>Nombre completo del evaluador</label>
+    <input type="text" id="ev_nombre" placeholder="Dr. / Dra. ...">
+    <div class="row2">
+      <div>
+        <label>Código evaluador</label>
+        <input type="text" id="ev_codigo" placeholder="EVALT-01">
+      </div>
+      <div>
+        <label>QR escaneado</label>
+        <select id="ev_qr">
+          <option value="">—</option>
+          <option>Sí</option>
+          <option>No</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PANTALLA 4: CONFIRMACIÓN ═══════════════════════ -->
+<div class="screen" id="screen4">
+  <div class="alert alert-success">✅ Registro guardado correctamente.</div>
+  <div id="syncBadge"></div>
+  <div class="card" id="summaryCard">
+    <div class="card-title">Resumen del caso</div>
+    <div id="summaryContent"></div>
+  </div>
+  <button class="btn btn-accent" onclick="exportSingleCSV()">⬇ Exportar este registro (CSV)</button>
+  <button class="btn btn-secondary" onclick="printSummary()">🖨 Imprimir resumen</button>
+  <button class="btn btn-outline" onclick="newRecord()">+ Nuevo paciente</button>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav" id="bottomNav">
+  <button class="btn btn-outline" id="btnBack" onclick="goBack()" style="display:none;">← Atrás</button>
+  <button class="btn btn-primary" id="btnNext" onclick="goNext()">Continuar →</button>
+</div>
+
+<!-- INSTALL BUTTON -->
+<button class="btn btn-accent" id="installBtn" style="display:none;position:fixed;bottom:80px;left:16px;right:16px;z-index:200;" onclick="installApp()">
+  📲 Instalar en mi teléfono
+</button>
+
+<script>
+
+
+// ── SISTEMA DE IDENTIFICACIÓN POR GMAIL ────────────────────────────────
+const STORAGE_KEY_USER = 'altoque_study_user';
+
+function loadUser() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY_USER) || 'null'); }
+  catch(e) { return null; }
+}
+function saveUser(u) { localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(u)); }
+function clearUser() { localStorage.removeItem(STORAGE_KEY_USER); }
+
+function isValidGmail(email) {
+  return /^[^\s@]+@gmail\.com$/i.test(email.trim());
+}
+function generateCode(role, email) {
+  const initials = email.split('@')[0].replace(/[^a-zA-Z]/g,'').toUpperCase().slice(0,3);
+  return role + '-' + initials;
+}
+function showLoginScreen() {
+  const el = document.getElementById('loginOverlay');
+  if (el) el.style.display = 'flex';
+}
+function hideLoginScreen() {
+  const el = document.getElementById('loginOverlay');
+  if (el) el.style.display = 'none';
+}
+function submitLogin() {
+  const email = (document.getElementById('loginEmail')||{}).value||'';
+  const name  = (document.getElementById('loginName')||{}).value||'';
+  const role  = (document.getElementById('loginRole')||{}).value||'';
+  const err   = document.getElementById('loginError');
+
+  if (!isValidGmail(email.trim())) {
+    if(err) err.textContent = '⚠ Ingresa un correo Gmail válido (@gmail.com)';
+    return;
+  }
+  if (name.trim().length < 4) {
+    if(err) err.textContent = '⚠ Ingresa tu nombre completo';
+    return;
+  }
+  if (!role) {
+    if(err) err.textContent = '⚠ Selecciona tu rol en el estudio';
+    return;
+  }
+  if(err) err.textContent = '';
+
+  const user = {
+    email: email.trim(),
+    name:  name.trim(),
+    role,
+    code:  generateCode(role, email.trim()),
+    registeredAt: new Date().toISOString()
+  };
+  saveUser(user);
+  // También guardar en clave maestra del portal
+  localStorage.setItem('hlev_study_user_2026', JSON.stringify(user));
+  applyUserToForm(user);
+  hideLoginScreen();
+}
+function applyUserToForm(user) {
+  // Rellenar campos de evaluador automáticamente (solo lectura)
+  const fieldMap = {
+    's0_evaluador':         user.code,
+    'ev_codigo':            user.code,
+    'ev_nombre':            user.name,
+    's0_neurologo_codigo':  user.code,
+    's0_neurologo_nombre':  user.name,
+    's0_coordinador':       user.code,
+  };
+  Object.entries(fieldMap).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.value    = val;
+      el.readOnly = true;
+      el.style.background  = '#f0f8f0';
+      el.style.color       = '#1a4a1a';
+      el.style.fontWeight  = '600';
+    }
+  });
+  // Mostrar badge de usuario en el header
+  const badge = document.getElementById('userBadge');
+  if (badge) {
+    badge.innerHTML =
+      `<span style="font-size:11px;opacity:0.9">👤 ${user.name}</span>` +
+      `<span style="font-size:10px;opacity:0.7;margin-left:6px">${user.code}</span>` +
+      `<button onclick="logoutUser()" style="background:rgba(255,255,255,0.2);border:none;` +
+      `color:white;font-size:10px;padding:2px 8px;border-radius:4px;margin-left:8px;cursor:pointer;">` +
+      `Cambiar</button>`;
+  }
+}
+function logoutUser() {
+  if (!confirm('¿Cambiar de usuario?\n\nLos registros ya guardados NO se borran.')) return;
+  clearUser();
+  location.reload();
+}
+function loadPortalSession() {
+  const keys = ['hlev_study_user_2026', 'altoque_study_user'];
+  for (const key of keys) {
+    try {
+      const data = localStorage.getItem(key);
+      if (data) {
+        const user = JSON.parse(data);
+        if (user && user.email && user.name && user.code) return user;
+      }
+    } catch(e) {}
+  }
+  return null;
+}
+
+// ── CONFIGURACIÓN GOOGLE SHEETS ────────────────────────────────────────
+// ▼ PEGAR AQUÍ LA URL QUE GENERA GOOGLE APPS SCRIPT (termina en /exec) ▼
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyzvGrCJ47xSH3SXAdsAGwcM81AoQQii3PEqogjhaEIoCGHGP7q3hjDp-hAQXHl5CrT/exec";
+const SOURCE = "altoque";
+
+async function syncToSheets(record) {
+  if (!WEBHOOK_URL || WEBHOOK_URL.includes("PEGAR_AQUI")) return { ok: false, error: "noconfig" };
+  try {
+    const r = await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source: SOURCE, record })
+    });
+    return await r.json();
+  } catch(e) { return { ok: false, error: "offline" }; }
+}
+function showSyncBadge(status) {
+  const el = document.getElementById('syncBadge');
+  if (!el) return;
+  const cfg = {
+    syncing: ["⏳ Sincronizando con Google Sheets…", "#FFF3CD", "#7A4F00"],
+    ok:      ["☁️ Guardado en Google Sheets ✓",       "#D4EDDA", "#155724"],
+    offline: ["📱 Sin internet — guardado solo en este dispositivo", "#F8D7DA", "#721C24"],
+    noconfig:["⚙️ Configura el WEBHOOK_URL para activar Google Sheets", "#FFF3CD", "#7A4F00"],
+  };
+  const [text, bg, color] = cfg[status] || cfg.offline;
+  el.innerHTML = `<div style="padding:10px 14px;border-radius:8px;background:${bg};color:${color};font-size:13px;font-weight:600;margin-top:10px;">${text}</div>`;
+}
+
+// ── STATE ──────────────────────────────────────────────────────────────
+let currentScreen = 0;
+let itemValues = { A: null, L: null, T: null, O: null, QUE: null };
+let checkStates = {};
+let deferredPrompt = null;
+let records = JSON.parse(localStorage.getItem('altoque_records') || '[]');
+
+// ── PWA INSTALL ────────────────────────────────────────────────────────
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBtn').style.display = 'block';
+  document.getElementById('installBanner').style.display = 'flex';
+});
+async function installApp() {
+  if (!deferredPrompt) {
+    alert('Para instalar:\n• iPhone/iPad: pulsa Compartir (⬆) → "Añadir a inicio"\n• Android: menú ⋮ → "Instalar aplicación"');
+    return;
+  }
+  deferredPrompt.prompt();
+  const result = await deferredPrompt.userChoice;
+  if (result.outcome === 'accepted') {
+    document.getElementById('installBtn').style.display = 'none';
+    document.getElementById('installBanner').style.display = 'none';
+  }
+  deferredPrompt = null;
+}
+
+// ── NAVIGATION ─────────────────────────────────────────────────────────
+function goToScreen(n) {
+  if (!validateScreen(currentScreen)) return;
+  document.getElementById('screen'+currentScreen).classList.remove('active');
+  currentScreen = n;
+  document.getElementById('screen'+n).classList.add('active');
+  updateNav();
+  updateStepBar();
+  window.scrollTo(0, 0);
+  if (n === 3) updateScore();
+}
+function goNext() {
+  if (currentScreen < 3) goToScreen(currentScreen + 1);
+  else saveRecord();
+}
+function goBack() {
+  if (currentScreen > 0) goToScreen(currentScreen - 1);
+}
+function updateNav() {
+  const btnBack = document.getElementById('btnBack');
+  const btnNext = document.getElementById('btnNext');
+  btnBack.style.display = currentScreen > 0 ? 'block' : 'none';
+  if (currentScreen === 3) { btnNext.textContent = '💾 Guardar registro'; btnNext.className = 'btn btn-success'; }
+  else { btnNext.textContent = 'Continuar →'; btnNext.className = 'btn btn-primary'; }
+  document.getElementById('bottomNav').style.display = currentScreen === 4 ? 'none' : 'flex';
+}
+function updateStepBar() {
+  for (let i = 0; i < 5; i++) {
+    const dot = document.getElementById('dot'+i);
+    dot.className = 'step-dot' + (i < currentScreen ? ' done' : i === currentScreen ? ' active' : '');
+  }
+}
+
+// ── VALIDATION ─────────────────────────────────────────────────────────
+function validateScreen(n) {
+  if (n === 0) {
+    if (!document.getElementById('s0_id').value.trim()) { alert('Ingrese el ID del paciente'); return false; }
+    if (!document.getElementById('s0_evaluador').value.trim()) { alert('Ingrese el código del evaluador'); return false; }
+  }
+  return true;
+}
+
+// ── TABS ───────────────────────────────────────────────────────────────
+function switchTab(showId, hideId, el) {
+  document.getElementById(showId).style.display = 'block';
+  document.getElementById(hideId).style.display = 'none';
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if (showId === 'tabRegistros') renderRecords();
+}
+
+// ── CHECKBOXES ─────────────────────────────────────────────────────────
+function toggleCheck(id) {
+  checkStates[id] = !checkStates[id];
+  const box = document.getElementById(id);
+  if (checkStates[id]) box.classList.add('checked');
+  else box.classList.remove('checked');
+}
+
+// ── ALTOQUE ITEMS ──────────────────────────────────────────────────────
+function selectItem(item, val) {
+  itemValues[item] = val;
+  ['si','no','ne'].forEach(v => {
+    document.getElementById(`btn_${item}_${v}`).className = 'toggle-btn' + (v === val ? ` selected-${v}` : '');
+  });
+  document.getElementById(`card_${item}`).className = 'item-card' + (val ? ` answered-${val}` : '');
+}
+
+// ── SCORE ──────────────────────────────────────────────────────────────
+function updateScore() {
+  const items = ['A','L','T','O','QUE'];
+  let total = items.reduce((s,i) => s + (itemValues[i]==='si'?1:0), 0);
+  document.getElementById('scoreNum').textContent = total;
+  const badge = document.getElementById('resultBadge');
+  if (total >= 1) { badge.textContent = '⚠ POSITIVO'; badge.className = 'result-badge result-positive'; }
+  else { badge.textContent = '✓ NEGATIVO'; badge.className = 'result-badge result-negative'; }
+  calcDelta();
+}
+
+function calcDelta() {
+  const ini = document.getElementById('t_ini_eval').value;
+  const fin = document.getElementById('t_fin_eval').value;
+  if (ini && fin) {
+    const diff = timeToMin(fin) - timeToMin(ini);
+    if (diff >= 0) {
+      document.getElementById('tiempoDelta').style.display = 'block';
+      document.getElementById('tiempoDelta').textContent = `⏱ Duración evaluación ALTOQUE: ${diff} minuto(s)`;
+    }
+  }
+}
+function timeToMin(t) { const [h,m] = t.split(':').map(Number); return h*60+m; }
+
+// ── SAVE RECORD ────────────────────────────────────────────────────────
+function saveRecord() {
+  const items = ['A','L','T','O','QUE'];
+  const total = items.reduce((s,i) => s + (itemValues[i]==='si'?1:0), 0);
+  const resultado = total >= 1 ? 'POSITIVO' : 'NEGATIVO';
+
+  const record = {
+    // IDENTIFICACIÓN
+    id: document.getElementById('s0_id').value.trim(),
+    fecha: document.getElementById('s0_fecha').value,
+    turno: document.getElementById('s0_turno').value,
+    evaluador_codigo: document.getElementById('s0_evaluador').value.trim(),
+    // ADMISIÓN
+    hora_ingreso: document.getElementById('s1_hora_ingreso').value,
+    hora_inicio_eval: document.getElementById('s1_hora_ini_eval').value,
+    hora_inicio_sint: document.getElementById('s1_hora_ini_sint').value,
+    modo_llegada: document.getElementById('s1_modo_llegada').value,
+    inicio_sint: document.getElementById('s1_inicio').value,
+    actividad_inicio: document.getElementById('s1_actividad').value,
+    ait_previo: document.getElementById('s1_ait').value,
+    fa: document.getElementById('s1_fa').value,
+    anticoag: document.getElementById('s1_anticoag').value,
+    glucemia: document.getElementById('s1_glucemia').value,
+    cr1: checkStates.cr1||false, cr2: checkStates.cr2||false,
+    cr3: checkStates.cr3||false, cr4: checkStates.cr4||false, cr5: checkStates.cr5||false,
+    motivo_exclusion: document.getElementById('s1_motivo_excl').value,
+    // ALTOQUE ÍTEMS
+    ALTOQUE_A: itemValues.A,
+    ALTOQUE_L: itemValues.L,
+    ALTOQUE_T: itemValues.T,
+    ALTOQUE_O: itemValues.O,
+    ALTOQUE_QUE: itemValues.QUE,
+    ALTOQUE_Total: total,
+    ALTOQUE_Resultado: resultado,
+    notas: document.getElementById('s2_notas').value,
+    // TIEMPOS
+    t_triaje: document.getElementById('t_triaje').value,
+    t_ini_eval: document.getElementById('t_ini_eval').value,
+    t_fin_eval: document.getElementById('t_fin_eval').value,
+    t_neurologo: document.getElementById('t_neurologo').value,
+    t_tc: document.getElementById('t_tc').value,
+    t_fin_form: document.getElementById('t_fin_form').value,
+    // EVALUADOR
+    ev_nombre: document.getElementById('ev_nombre').value,
+    ev_qr: document.getElementById('ev_qr').value,
+    timestamp: new Date().toISOString()
+  };
+
+  records.push(record);
+  localStorage.setItem('altoque_records', JSON.stringify(records));
+  showSummary(record);
+  goToScreen(4);
+  // Sincronizar con Google Sheets
+  showSyncBadge('syncing');
+  syncToSheets(record).then(res => {
+    if (res.ok) showSyncBadge('ok');
+    else if (res.error === 'noconfig') showSyncBadge('noconfig');
+    else showSyncBadge('offline');
+  });
+}
+
+// ── SUMMARY ────────────────────────────────────────────────────────────
+function showSummary(r) {
+  const itemMap = { A:'Asimetría', L:'Lenguaje', T:'Torpeza', O:'Ojos', QUE:'¡Que no te puedas levantar!' };
+  let itemsHtml = '';
+  ['A','L','T','O','QUE'].forEach(k => {
+    const v = r['ALTOQUE_'+k];
+    const col = v==='si'?'var(--green)':v==='no'?'#e74c3c':'#95a5a6';
+    const label = v==='si'?'SÍ':v==='no'?'NO':v==='ne'?'NE':'—';
+    itemsHtml += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-weight:600">${k} — ${itemMap[k]}</span><span style="color:${col};font-weight:700">${label}</span></div>`;
+  });
+  document.getElementById('summaryContent').innerHTML = `
+    <div style="margin-bottom:8px"><strong>Paciente:</strong> ${r.id} &nbsp;|&nbsp; <strong>Fecha:</strong> ${r.fecha} &nbsp;|&nbsp; <strong>Turno:</strong> ${r.turno}</div>
+    <div style="margin-bottom:8px"><strong>Evaluador:</strong> ${r.ev_nombre||''} (${r.evaluador_codigo})</div>
+    ${itemsHtml}
+    <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:16px;font-weight:700">TOTAL ALTOQUE</span>
+      <span style="font-size:22px;font-weight:800;color:#8B1A1A">${r.ALTOQUE_Total}/5</span>
+    </div>
+    <div style="text-align:center;margin-top:10px">
+      <span style="background:${r.ALTOQUE_Resultado==='POSITIVO'?'var(--green)':'#e74c3c'};color:white;padding:8px 24px;border-radius:20px;font-weight:800;font-size:16px">${r.ALTOQUE_Resultado}</span>
+    </div>
+  `;
+}
+
+// ── RECORDS LIST ───────────────────────────────────────────────────────
+function renderRecords() {
+  const el = document.getElementById('recordsList');
+  if (records.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>No hay registros aún.<br>Complete el primer formulario para comenzar.</p></div>';
+    return;
+  }
+  el.innerHTML = records.map((r, origIdx) => ({ r, origIdx }))
+    .slice().reverse()
+    .map(({ r, origIdx }) => `
+    <div class="record-item" id="rec_${origIdx}">
+      <div class="record-header">
+        <div class="record-id">${r.id}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="record-badge ${r.ALTOQUE_Resultado==='POSITIVO'?'badge-pos':'badge-neg'}">${r.ALTOQUE_Resultado}</div>
+          <button onclick="deleteRecord(${origIdx})" style="background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:6px;font-size:18px;line-height:1;color:#c0392b;" title="Eliminar registro">🗑</button>
+        </div>
+      </div>
+      <div class="record-detail">${r.fecha} · Turno: ${r.turno} · Eval: ${r.evaluador_codigo}</div>
+      <div class="record-score">ALTOQUE: ${r.ALTOQUE_Total}/5 &nbsp;|&nbsp; A:${r.ALTOQUE_A||'—'} L:${r.ALTOQUE_L||'—'} T:${r.ALTOQUE_T||'—'} O:${r.ALTOQUE_O||'—'} QUE:${r.ALTOQUE_QUE||'—'}</div>
+    </div>
+  `).join('');
+}
+
+function deleteRecord(origIdx) {
+  const r = records[origIdx];
+  if (!r) return;
+  if (!confirm(`¿Eliminar el registro ${r.id} del ${r.fecha}?\n\nEsta acción no se puede deshacer.`)) return;
+  records.splice(origIdx, 1);
+  localStorage.setItem('altoque_records', JSON.stringify(records));
+  renderRecords();
+}
+
+// ── CSV HEADERS (compatibles con Hoja 1 del Excel maestro) ─────────────
+const CSV_HEADERS = [
+  'ID_Paciente','Fecha','Turno','Evaluador_Codigo','Evaluador_Nombre',
+  'Hora_Ingreso','Hora_Inicio_Eval','Hora_Inicio_Sint','Modo_Llegada','Inicio_Sint','Actividad_Inicio',
+  'AIT_Previo','FA','Anticoag','Glucemia_mgdL',
+  'CR1_Adulto','CR2_SintFocal','CR3_Tiempo24h','CR4_Acompanante','CR5_Consentimiento','Motivo_Exclusion',
+  'ALTOQUE_A_Asimetria','ALTOQUE_L_Lenguaje','ALTOQUE_T_Torpeza','ALTOQUE_O_Ojos','ALTOQUE_QUE_Levantarse',
+  'ALTOQUE_Total','ALTOQUE_Resultado',
+  'Notas',
+  'T_Triaje','T_Ini_Eval','T_Fin_Eval','T_Neurologo','T_TC','T_Fin_Form',
+  'QR_Escaneado','Timestamp'
+];
+
+function recordToRow(r) {
+  const v = x => (x===null||x===undefined)?'':String(x).replace(/,/g,';').replace(/\n/g,' ');
+  return [
+    v(r.id), v(r.fecha), v(r.turno), v(r.evaluador_codigo), v(r.ev_nombre),
+    v(r.hora_ingreso), v(r.hora_inicio_eval), v(r.hora_inicio_sint), v(r.modo_llegada), v(r.inicio_sint), v(r.actividad_inicio),
+    v(r.ait_previo), v(r.fa), v(r.anticoag), v(r.glucemia),
+    v(r.cr1?1:0), v(r.cr2?1:0), v(r.cr3?1:0), v(r.cr4?1:0), v(r.cr5?1:0), v(r.motivo_exclusion),
+    v(r.ALTOQUE_A), v(r.ALTOQUE_L), v(r.ALTOQUE_T), v(r.ALTOQUE_O), v(r.ALTOQUE_QUE),
+    v(r.ALTOQUE_Total), v(r.ALTOQUE_Resultado),
+    v(r.notas),
+    v(r.t_triaje), v(r.t_ini_eval), v(r.t_fin_eval), v(r.t_neurologo), v(r.t_tc), v(r.t_fin_form),
+    v(r.ev_qr), v(r.timestamp)
+  ].join(',');
+}
+
+function exportCSV() {
+  if (records.length === 0) { alert('No hay registros para exportar.'); return; }
+  const csv = [CSV_HEADERS.join(','), ...records.map(recordToRow)].join('\n');
+  downloadBlob(csv, `ALTOQUE_BD_${today()}.csv`);
+}
+function exportSingleCSV() {
+  const r = records[records.length-1];
+  const csv = [CSV_HEADERS.join(','), recordToRow(r)].join('\n');
+  downloadBlob(csv, `ALTOQUE_${r.id}_${today()}.csv`);
+}
+function downloadBlob(content, filename) {
+  const BOM = '\uFEFF';
+  const blob = new Blob([BOM+content], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+function today() { return new Date().toISOString().slice(0,10).replace(/-/g,''); }
+
+// ── CSV IMPORT ─────────────────────────────────────────────────────────
+function importCSV() { document.getElementById('csvFileInput').click(); }
+function handleImport(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const lines = ev.target.result.replace(/\uFEFF/,'').split('\n').filter(l=>l.trim());
+    if (lines.length < 2) { alert('Archivo CSV vacío.'); return; }
+    const headers = lines[0].split(',');
+    let imported = 0;
+    for (let i=1; i<lines.length; i++) {
+      const vals = lines[i].split(',');
+      const obj = {}; headers.forEach((h,j) => obj[h.trim()] = vals[j]||'');
+      const rec = {
+        id: obj.ID_Paciente, fecha: obj.Fecha, turno: obj.Turno,
+        evaluador_codigo: obj.Evaluador_Codigo, ev_nombre: obj.Evaluador_Nombre,
+        hora_ingreso: obj.Hora_Ingreso, hora_inicio_eval: obj.Hora_Inicio_Eval,
+        hora_inicio_sint: obj.Hora_Inicio_Sint, modo_llegada: obj.Modo_Llegada,
+        inicio_sint: obj.Inicio_Sint, actividad_inicio: obj.Actividad_Inicio,
+        ait_previo: obj.AIT_Previo, fa: obj.FA, anticoag: obj.Anticoag, glucemia: obj.Glucemia_mgdL,
+        cr1: obj.CR1_Adulto==='1', cr2: obj.CR2_SintFocal==='1',
+        cr3: obj.CR3_Tiempo24h==='1', cr4: obj.CR4_Acompanante==='1', cr5: obj.CR5_Consentimiento==='1',
+        motivo_exclusion: obj.Motivo_Exclusion,
+        ALTOQUE_A: obj.ALTOQUE_A_Asimetria, ALTOQUE_L: obj.ALTOQUE_L_Lenguaje,
+        ALTOQUE_T: obj.ALTOQUE_T_Torpeza, ALTOQUE_O: obj.ALTOQUE_O_Ojos, ALTOQUE_QUE: obj.ALTOQUE_QUE_Levantarse,
+        ALTOQUE_Total: parseInt(obj.ALTOQUE_Total)||0, ALTOQUE_Resultado: obj.ALTOQUE_Resultado,
+        notas: obj.Notas, t_triaje: obj.T_Triaje, t_ini_eval: obj.T_Ini_Eval,
+        t_fin_eval: obj.T_Fin_Eval, t_neurologo: obj.T_Neurologo, t_tc: obj.T_TC,
+        t_fin_form: obj.T_Fin_Form, ev_qr: obj.QR_Escaneado, timestamp: obj.Timestamp||new Date().toISOString()
+      };
+      if (rec.id && !records.find(x=>x.id===rec.id&&x.timestamp===rec.timestamp)) {
+        records.push(rec); imported++;
+      }
+    }
+    localStorage.setItem('altoque_records', JSON.stringify(records));
+    alert(`✅ Se importaron ${imported} registro(s) nuevo(s).`);
+    renderRecords();
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ── UTILS ──────────────────────────────────────────────────────────────
+function newRecord() {
+  itemValues = { A: null, L: null, T: null, O: null, QUE: null };
+  checkStates = {};
+  ['A','L','T','O','QUE'].forEach(item => {
+    ['si','no','ne'].forEach(v => {
+      const btn = document.getElementById(`btn_${item}_${v}`);
+      if (btn) btn.className = 'toggle-btn';
+    });
+    const card = document.getElementById(`card_${item}`);
+    if (card) card.className = 'item-card';
+  });
+  ['cr1','cr2','cr3','cr4','cr5'].forEach(id => {
+    checkStates[id] = false;
+    document.getElementById(id).classList.remove('checked');
+  });
+  document.querySelectorAll('input[type="text"],input[type="number"],input[type="time"],select,textarea').forEach(el => el.value='');
+  document.getElementById('s0_fecha').value = new Date().toISOString().slice(0,10);
+  goToScreen(0);
+}
+function printSummary() { window.print(); }
+
+// ── INIT ───────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  // Leer sesión del portal o del dispositivo
+  const user = loadPortalSession() || loadUser();
+  if (user) {
+    saveUser(user);
+    applyUserToForm(user);
+    hideLoginScreen();
+  } else {
+    showLoginScreen();
+  }
+  document.getElementById('s0_fecha').value = new Date().toISOString().slice(0,10);
+  updateNav();
+  updateStepBar();
+});
+['t_ini_eval','t_fin_eval'].forEach(id => {
+  document.getElementById(id)?.addEventListener('change', calcDelta);
+});
+</script>
+</body>
+</html>

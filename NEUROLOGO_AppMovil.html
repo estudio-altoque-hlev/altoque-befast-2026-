@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NEU-01">
+<meta name="theme-color" content="#1a4a1a">
+<title>NEU-01 – Evaluación Neurológica</title>
+<style>
+  :root {
+    --green-dark: #1a4a1a;
+    --green-mid:  #2a6a2a;
+    --green-btn:  #2a8a4a;
+    --navy:       #1a3a5c;
+    --navy-dark:  #0f2540;
+    --teal:       #0d7c8f;
+    --gold:       #f5b840;
+    --red:        #c0392b;
+    --red-light:  #e74c3c;
+    --bg:         #f0f4f0;
+    --card:       #ffffff;
+    --border:     #c8d8c8;
+    --text:       #1a2535;
+    --muted:      #5a6a5a;
+    --radius:     12px;
+    --shadow:     0 2px 12px rgba(26,74,26,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 90px; }
+
+  .header { background: linear-gradient(135deg, #0f2a0f 0%, var(--green-dark) 50%, var(--green-mid) 100%); color: white; padding: 16px 18px 14px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(0,0,0,0.22); }
+  .header-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .header-badge { background: var(--gold); color: var(--navy-dark); font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 20px; letter-spacing: 1px; }
+  .header h1 { font-size: 18px; font-weight: 700; }
+  .header-sub { font-size: 11px; opacity: 0.78; line-height: 1.4; }
+  .step-bar { display: flex; gap: 4px; margin-top: 10px; }
+  .step-dot { flex: 1; height: 3px; background: rgba(255,255,255,0.25); border-radius: 2px; transition: background 0.3s; }
+  .step-dot.done { background: var(--gold); }
+  .step-dot.active { background: white; }
+
+  .screen { display: none; }
+  .screen.active { display: block; padding: 16px; }
+
+  .card { background: var(--card); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--green-mid); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; width: 3px; height: 14px; background: var(--green-mid); border-radius: 2px; display: inline-block; }
+
+  label { font-size: 13px; font-weight: 600; color: var(--text); display: block; margin-bottom: 5px; }
+  .hint { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-style: italic; }
+  input[type="text"], input[type="number"], input[type="time"], input[type="date"], select, textarea {
+    width: 100%; padding: 11px 13px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 15px; color: var(--text); background: #f8fcf8; appearance: none; -webkit-appearance: none;
+    outline: none; transition: border-color 0.2s; margin-bottom: 12px;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--green-btn); background: #fff; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  textarea { resize: vertical; min-height: 70px; }
+
+  /* NIHSS ITEMS */
+  .nihss-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+  .nihss-item label { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+  .nihss-item input { margin-bottom: 0; font-size: 14px; padding: 8px 10px; }
+  .nihss-total-box { background: linear-gradient(135deg, var(--green-dark), var(--green-mid)); color: white; border-radius: 10px; padding: 16px; text-align: center; margin: 12px 0; }
+  .nihss-total-num { font-size: 48px; font-weight: 800; line-height: 1; }
+  .nihss-total-label { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+  .nihss-severity { font-size: 14px; font-weight: 700; margin-top: 8px; padding: 4px 16px; border-radius: 20px; display: inline-block; }
+
+  /* TOGGLE */
+  .toggle-group { display: flex; gap: 8px; margin-bottom: 12px; }
+  .toggle-btn { flex: 1; padding: 10px 4px; border: 2px solid var(--border); border-radius: 8px; background: #f8fcf8; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; text-align: center; transition: all 0.18s; user-select: none; }
+  .toggle-btn:active { transform: scale(0.96); }
+  .toggle-btn.sel-ant  { background: #1a4a8a; border-color: #1a4a8a; color: white; }
+  .toggle-btn.sel-pos  { background: var(--red); border-color: var(--red); color: white; }
+  .toggle-btn.sel-ind  { background: #7f8c8d; border-color: #7f8c8d; color: white; }
+  .toggle-btn.sel-yes  { background: var(--green-btn); border-color: var(--green-btn); color: white; }
+  .toggle-btn.sel-no   { background: var(--red-light); border-color: var(--red); color: white; }
+  .toggle-btn.sel-ictu { background: #2a6a8a; border-color: #1a5a7a; color: white; }
+  .toggle-btn.sel-mimic{ background: #8a6a1a; border-color: #7a5a0a; color: white; }
+  .toggle-btn.sel-ait  { background: #6a2a7a; border-color: #5a1a6a; color: white; }
+  .toggle-btn.sel-nd   { background: #5a5a5a; border-color: #4a4a4a; color: white; }
+
+  /* SCORE & RESULT */
+  .score-box { background: linear-gradient(135deg, var(--navy), var(--green-dark)); color: white; border-radius: var(--radius); padding: 18px; text-align: center; margin: 14px 0; box-shadow: 0 4px 20px rgba(26,74,26,0.25); }
+  .result-badge { display: inline-block; font-size: 16px; font-weight: 800; padding: 8px 22px; border-radius: 30px; margin-top: 10px; }
+  .result-ictus { background: #2a6a8a; }
+  .result-mimic { background: #8a6a1a; }
+  .result-ait   { background: #6a2a7a; }
+  .result-nd    { background: #5a5a5a; }
+
+  .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.18s; margin-bottom: 10px; }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--green-mid); color: white; }
+  .btn-secondary { background: var(--navy); color: white; }
+  .btn-accent { background: var(--gold); color: var(--navy-dark); }
+  .btn-outline { background: transparent; color: var(--green-btn); border: 2px solid var(--green-btn); }
+  .btn-success { background: var(--green-btn); color: white; }
+
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); display: flex; gap: 10px; padding: 12px 16px; box-shadow: 0 -4px 16px rgba(0,0,0,0.08); z-index: 100; }
+  .bottom-nav .btn { margin: 0; }
+
+  .alert { padding: 12px 14px; border-radius: 9px; font-size: 13px; margin-bottom: 12px; line-height: 1.5; font-weight: 500; }
+  .alert-warning { background: #fff3cd; border: 1px solid #f5b840; color: #7a4f00; }
+  .alert-info    { background: #d1ecf1; border: 1px solid #0d7c8f; color: #0a4a55; }
+  .alert-success { background: #d4edda; border: 1px solid #2a8a4a; color: #155724; }
+  .alert-danger  { background: #f8d7da; border: 1px solid #c0392b; color: #721c24; }
+
+  .record-item { background: white; border-radius: 10px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .record-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .record-id { font-size: 13px; font-weight: 700; color: var(--navy); }
+  .record-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .badge-ictus { background: #cce5f0; color: #1a4a6a; }
+  .badge-mimic { background: #fdecc8; color: #7a4f00; }
+  .badge-ait   { background: #e8d5f0; color: #4a1a6a; }
+  .badge-nd    { background: #e0e0e0; color: #404040; }
+  .record-detail { font-size: 12px; color: var(--muted); }
+  .record-score  { font-size: 13px; font-weight: 700; color: var(--green-dark); margin-top: 4px; }
+
+  .sep { height: 1px; background: var(--border); margin: 14px 0; }
+  .nav-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .nav-tab { flex: 1; padding: 8px; border: 1.5px solid var(--border); border-radius: 8px; background: white; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; text-align: center; transition: all 0.15s; }
+  .nav-tab.active { background: var(--green-dark); color: white; border-color: var(--green-dark); }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+  .install-banner { background: linear-gradient(135deg, #d4edda, #a8d5b5); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN OVERLAY ──────────────────────────────────────────── -->
+<div id="loginOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,37,64,0.97);z-index:9999;flex-direction:column;align-items:center;justify-content:center;padding:24px;">
+  <div style="width:100%;max-width:420px;background:white;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.4);">
+    <div style="background:linear-gradient(135deg,#0f2540,#1a3a5c);padding:22px 20px 18px;">
+      <div style="font-size:11px;font-weight:800;color:#f5b840;letter-spacing:1px;margin-bottom:6px;">ESTUDIO ALTOQUE vs. BEFAST 2026</div>
+      <div style="font-size:20px;font-weight:700;color:white;">Identificación del evaluador</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:4px;">Hospital Lima Este Vitarte · Solo necesitas hacerlo una vez en este dispositivo</div>
+    </div>
+    <div style="padding:20px;">
+      <label style="font-size:13px;font-weight:600;color:#1a2535;display:block;margin-bottom:5px;">Correo Gmail institucional o personal</label>
+      <input type="email" id="loginEmail" placeholder="tucorreo@gmail.com"
+        style="width:100%;padding:12px 14px;border:1.5px solid #d0dce8;border-radius:8px;font-size:15px;margin-bottom:14px;outline:none;box-sizing:border-box;">
+
+      <label style="font-size:13px;font-weight:600;color:#1a2535;display:block;margin-bottom:5px;">Nombre completo</label>
+      <input type="text" id="loginName" placeholder="Dr. / Dra. Apellido Nombre"
+        style="width:100%;padding:12px 14px;border:1.5px solid #d0dce8;border-radius:8px;font-size:15px;margin-bottom:14px;outline:none;box-sizing:border-box;">
+
+      <label style="font-size:13px;font-weight:600;color:#1a2535;display:block;margin-bottom:5px;">Rol en el estudio</label>
+      <select id="loginRole"
+        style="width:100%;padding:12px 14px;border:1.5px solid #d0dce8;border-radius:8px;font-size:15px;margin-bottom:6px;outline:none;background:#f8fafc;box-sizing:border-box;appearance:none;">
+        <option value="">Seleccionar...</option>
+        <option value="EVALT">Evaluador ALTOQUE</option>
+        <option value="EVBEF">Evaluador BEFAST</option>
+        <option value="NEU" selected>Neurólogo consultor</option>
+        <option value="COORD">Coordinador de datos</option>
+        <option value="IP">Investigador Principal</option>
+      </select>
+
+      <div id="loginError" style="font-size:12px;color:#c0392b;min-height:18px;margin-bottom:10px;font-weight:600;"></div>
+
+      <button onclick="submitLogin()"
+        style="width:100%;padding:14px;background:linear-gradient(135deg,#1a3a5c,#0d7c8f);color:white;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;">
+        ✓ Confirmar identidad y continuar
+      </button>
+
+      <div style="font-size:11px;color:#5a6a7e;text-align:center;margin-top:12px;line-height:1.5;">
+        Tu correo se guarda solo en este dispositivo.<br>No se comparte con terceros ni se usa para marketing.
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="header">
+  <div class="header-top">
+    <span class="header-badge">NEU-01</span>
+    <h1>Evaluación Neurológica</h1>
+  </div>
+  <div class="header-sub">Hospital Lima Este Vitarte · Estándar de referencia · ALTOQUE vs. BEFAST 2026<div id="userBadge" style="margin-top:6px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;"></div>
+  <div class="step-bar" id="stepBar">
+    <div class="step-dot" id="dot0"></div>
+    <div class="step-dot" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+    <div class="step-dot" id="dot4"></div>
+  </div>
+</div>
+
+<!-- ══════════ PANTALLA 0: INICIO ══════════ -->
+<div class="screen active" id="screen0">
+  <div id="installBanner" class="install-banner" style="display:none;">
+    <div style="font-size:28px">📲</div>
+    <div><strong style="font-size:14px;color:#1a4a1a">Instalar en tu teléfono</strong><br><span style="font-size:12px;color:#2a6a2a">Toca el botón de abajo para añadir esta app</span></div>
+  </div>
+
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab('tabNuevo','tabRegistros',this)">+ Nueva evaluación</div>
+    <div class="nav-tab" onclick="switchTab('tabRegistros','tabNuevo',this)">📋 Mis registros</div>
+  </div>
+
+  <div id="tabNuevo">
+    <div class="alert alert-danger">
+      <strong>⚠ CEGAMIENTO OBLIGATORIO:</strong> El neurólogo evalúa al paciente SIN conocer el resultado de ALTOQUE ni de BEFAST. No consulte los formularios de los evaluadores de escala antes de completar este formulario.
+    </div>
+    <div class="card">
+      <div class="card-title">Identificación del caso</div>
+      <label>ID del Paciente (formato ALTO-2026-NNN)</label>
+      <input type="text" id="s0_id" placeholder="ALTO-2026-001" oninput="this.value=this.value.toUpperCase()">
+      <div class="row2">
+        <div><label>Fecha</label><input type="date" id="s0_fecha"></div>
+        <div><label>Hora evaluación</label><input type="time" id="s0_hora_eval"></div>
+      </div>
+      <label>Neurólogo evaluador (código)</label>
+      <input type="text" id="s0_neurologo_codigo" placeholder="ej. NEU-A">
+      <label>Nombre completo del neurólogo</label>
+      <input type="text" id="s0_neurologo_nombre" placeholder="Dr. / Dra. ...">
+    </div>
+    <button class="btn btn-primary" onclick="goToScreen(1)">Continuar → Evaluación clínica</button>
+  </div>
+
+  <div id="tabRegistros" style="display:none;">
+    <div id="recordsList"></div>
+    <div class="sep"></div>
+    <button class="btn btn-accent" onclick="exportCSV()">⬇ Exportar todos (CSV)</button>
+    <button class="btn btn-outline" onclick="importCSV()">⬆ Importar CSV</button>
+    <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleImport(event)">
+  </div>
+</div>
+
+<!-- ══════════ PANTALLA 1: EVALUACIÓN CLÍNICA ══════════ -->
+<div class="screen" id="screen1">
+  <div class="card">
+    <div class="card-title">Impresión diagnóstica inicial</div>
+    <div class="hint">Registrar ANTES de conocer el resultado de neuroimagen</div>
+    <label>Impresión diagnóstica</label>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="dx_ictus" onclick="selectToggle('dx','ictus','sel-ictu')">Ictus isquémico</div>
+      <div class="toggle-btn" id="dx_hemor" onclick="selectToggle('dx','hemor','sel-pos')">Hemorrágico</div>
+    </div>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="dx_ait"   onclick="selectToggle('dx','ait','sel-ait')">AIT</div>
+      <div class="toggle-btn" id="dx_mimic" onclick="selectToggle('dx','mimic','sel-mimic')">Imitador (mimic)</div>
+      <div class="toggle-btn" id="dx_nd"    onclick="selectToggle('dx','nd','sel-nd')">No determinado</div>
+    </div>
+
+    <label>Localización topográfica clínica</label>
+    <select id="s1_localizacion">
+      <option value="">Seleccionar...</option>
+      <option>Hemisferio izquierdo</option>
+      <option>Hemisferio derecho</option>
+      <option>Tronco encefálico</option>
+      <option>Cerebelo</option>
+      <option>Tálamo / ganglios basales</option>
+      <option>Multifocal</option>
+      <option>Indeterminada</option>
+    </select>
+
+    <label>Territorio vascular clínico</label>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="terr_ant" onclick="selectToggle('terr','ant','sel-ant')">Anterior (carotídeo)</div>
+      <div class="toggle-btn" id="terr_pos" onclick="selectToggle('terr','pos','sel-pos')">Posterior (vertebrobasilar)</div>
+      <div class="toggle-btn" id="terr_ind" onclick="selectToggle('terr','ind','sel-ind')">Indeterminado</div>
+    </div>
+
+    <label>Síntomas predominantes al ingreso</label>
+    <textarea id="s1_sintomas" placeholder="ej. hemiparesia derecha + afasia de expresión de inicio súbito..."></textarea>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Antecedentes relevantes (verificación)</div>
+    <div class="row2">
+      <div>
+        <label>AIT / Ictus previo</label>
+        <select id="s1_ait_prev">
+          <option value="">—</option><option>Sí</option><option>No</option>
+        </select>
+      </div>
+      <div>
+        <label>Fibrilación auricular</label>
+        <select id="s1_fa">
+          <option value="">—</option><option>Sí</option><option>No</option><option>Desconocido</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>HTA conocida</label>
+        <select id="s1_hta">
+          <option value="">—</option><option>Sí</option><option>No</option>
+        </select>
+      </div>
+      <div>
+        <label>DM2</label>
+        <select id="s1_dm">
+          <option value="">—</option><option>Sí</option><option>No</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PANTALLA 2: NIHSS ══════════ -->
+<div class="screen" id="screen2">
+  <div class="alert alert-info">
+    Registre el NIHSS de admisión. Evalúe cada ítem según protocolo estándar. El total se calcula automáticamente.
+  </div>
+
+  <div class="card">
+    <div class="card-title">Escala NIHSS — Ítems 1a–11</div>
+    <div class="nihss-grid">
+      <div class="nihss-item"><label>1a. Nivel consciencia (0-3)</label><input type="number" id="n1a" min="0" max="3" placeholder="0-3" oninput="updateNIHSS()"></div>
+      <div class="nihss-item"><label>1b. Preguntas (0-2)</label><input type="number" id="n1b" min="0" max="2" placeholder="0-2" oninput="updateNIHSS()"></div>
+      <div class="nihss-item"><label>1c. Órdenes (0-2)</label><input type="number" id="n1c" min="0" max="2" placeholder="0-2" oninput="updateNIHSS()"></div>
+      <div class="nihss-item"><label>2. Mirada (0-2)</label><input type="number" id="n2" min="0" max="2" placeholder="0-2" oninput="updateNIHSS()"></div>
+      <div class="nihss-item"><label>3. Visual (0-3)</label><input type="number" id="n3" min="0" max="3" placeholder="0-3" oninput="updateNIHSS()"></div>
+      <div class="nihss-item"><label>4. Facial (0-3)</label><input type="number" id="n4" min="0" max="3" placeholder="0-3" oninput="updateNIHSS()"></div>
+      <div class="nihss-item"><label>5a. Brazo izq. (0-4)</label><input type="number" id="n5a" min="0" max="4" placeholder="0-4" oninput="updateNIHSS()"></div>
+      <div class="nihss-item"><label>5b. Brazo der. (0-4)</label><input type="number" id="n5b" min="0" max="4" placeholder="0-4" oninput="updateNIHSS()"></div>
+      <div class="nihss-item"><label>6a. Pierna izq. (0-4)</label><input type="number" id="n6a" min="0" max="4" placeholder="0-4" oninput="updateNIHSS()"></div>
+      <div class="nihss-item"><label>6b. Pierna der. (0-4)</label><input type="number" id="n6b" min="0" max="4" placeholder="0-4" oninput="updateNIHSS()"></div>
+      <div class="nihss-item"><label>7. Ataxia (0-2)</label><input type="number" id="n7" min="0" max="2" placeholder="0-2" oninput="updateNIHSS()"></div>
+      <div class="nihss-item"><label>8. Sensibilidad (0-2)</label><input type="number" id="n8" min="0" max="2" placeholder="0-2" oninput="updateNIHSS()"></div>
+      <div class="nihss-item"><label>9. Lenguaje (0-3)</label><input type="number" id="n9" min="0" max="3" placeholder="0-3" oninput="updateNIHSS()"></div>
+      <div class="nihss-item"><label>10. Disartria (0-2)</label><input type="number" id="n10" min="0" max="2" placeholder="0-2" oninput="updateNIHSS()"></div>
+      <div class="nihss-item"><label>11. Extinción (0-2)</label><input type="number" id="n11" min="0" max="2" placeholder="0-2" oninput="updateNIHSS()"></div>
+    </div>
+
+    <div class="nihss-total-box">
+      <div class="nihss-total-label">NIHSS TOTAL</div>
+      <div class="nihss-total-num" id="nihssTotal">—</div>
+      <div class="nihss-total-label">de 42 puntos</div>
+      <div class="nihss-severity" id="nihssSeverity">—</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Neuroimagen</div>
+    <div class="row2">
+      <div>
+        <label>Tipo de imagen</label>
+        <select id="s2_tipo_img">
+          <option value="">—</option>
+          <option>TC craneal sin contraste</option>
+          <option>TC + angioTC</option>
+          <option>RM-DWI</option>
+          <option>TC + RM-DWI</option>
+          <option>No realizada</option>
+        </select>
+      </div>
+      <div>
+        <label>Hora neuroimagen</label>
+        <input type="time" id="s2_hora_img">
+      </div>
+    </div>
+    <label>Resultado TC craneal</label>
+    <select id="s2_result_tc">
+      <option value="">—</option>
+      <option>Normal</option>
+      <option>Hipodensidad focal (territorio MCA)</option>
+      <option>Hipodensidad focal (territorio posterior)</option>
+      <option>Hiperdensidad arterial (trombo)</option>
+      <option>Hemorragia intraparenquimatosa</option>
+      <option>Hemorragia subaracnoidea</option>
+      <option>Lesión antigua sin cambio agudo</option>
+      <option>No realizado</option>
+    </select>
+    <label>Resultado RM-DWI</label>
+    <select id="s2_result_rm">
+      <option value="">—</option>
+      <option>Restricción difusión (isquemia aguda)</option>
+      <option>Sin restricción</option>
+      <option>Múltiples focos de restricción</option>
+      <option>No realizada</option>
+    </select>
+    <div class="row2">
+      <div>
+        <label>Clasificación TOAST</label>
+        <select id="s2_toast">
+          <option value="">—</option>
+          <option>Cardioembólico</option>
+          <option>Ateroesclerosis de grandes vasos</option>
+          <option>Oclusión de pequeño vaso (lacunar)</option>
+          <option>Criptogénico</option>
+          <option>Otra etiología determinada</option>
+          <option>No aplicable (mimic/AIT)</option>
+        </select>
+      </div>
+      <div>
+        <label>Territorio por imagen</label>
+        <select id="s2_territorio_img">
+          <option value="">—</option>
+          <option>Anterior (carotídeo)</option>
+          <option>Posterior (vertebrobasilar)</option>
+          <option>Mixto</option>
+          <option>Indeterminado</option>
+          <option>Normal (sin lesión)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PANTALLA 3: ADJUDICACIÓN FINAL ══════════ -->
+<div class="screen" id="screen3">
+  <div class="alert alert-warning">
+    ⚡ La adjudicación final se realiza en la <strong>reunión semanal de cierre</strong> (72-96 h post-evaluación), después de completar el seguimiento. Puede dejarse pendiente y actualizar el registro.
+  </div>
+
+  <div class="card">
+    <div class="card-title">Adjudicación del estándar de referencia</div>
+    <div class="hint">Diagnóstico definitivo consensuado entre Neurólogo A + Neurólogo B (+ Neurólogo C si discordancia)</div>
+
+    <label>Diagnóstico definitivo final</label>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="adj_ictus_def" onclick="selectToggle('adj','ictus_def','sel-ictu')">Ictus definitivo</div>
+      <div class="toggle-btn" id="adj_ictus_prob" onclick="selectToggle('adj','ictus_prob','sel-ant')">Ictus probable</div>
+    </div>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="adj_ait_def"  onclick="selectToggle('adj','ait_def','sel-ait')">AIT definitivo</div>
+      <div class="toggle-btn" id="adj_mimic"    onclick="selectToggle('adj','mimic','sel-mimic')">Imitador (mimic)</div>
+      <div class="toggle-btn" id="adj_nd"       onclick="selectToggle('adj','nd','sel-nd')">No determinado</div>
+    </div>
+
+    <label>Tipo de ictus (si aplica)</label>
+    <select id="s3_tipo_ictus">
+      <option value="">—</option>
+      <option>Isquémico</option>
+      <option>Hemorrágico intraparenquimatoso</option>
+      <option>Hemorragia subaracnoidea</option>
+      <option>No aplica</option>
+    </select>
+
+    <label>Territorio vascular final (confirmado por imagen)</label>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="terr_f_ant" onclick="selectToggle('terr_f','ant','sel-ant')">Anterior</div>
+      <div class="toggle-btn" id="terr_f_pos" onclick="selectToggle('terr_f','pos','sel-pos')">Posterior</div>
+      <div class="toggle-btn" id="terr_f_ind" onclick="selectToggle('terr_f','ind','sel-ind')">Indeterminado</div>
+    </div>
+
+    <label>Concordancia entre neurólogos</label>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="conc_si" onclick="selectToggle('conc','si','sel-yes')">✓ Sí — acuerdo directo</div>
+      <div class="toggle-btn" id="conc_no" onclick="selectToggle('conc','no','sel-no')">✗ No — requirió 3° neurólogo</div>
+    </div>
+
+    <label>Evaluadores adjudicadores</label>
+    <input type="text" id="s3_evaluadores_adj" placeholder="ej. Neurólogos A+B / A+B+C">
+
+    <label>Semana de estudio</label>
+    <input type="number" id="s3_semana" placeholder="ej. 1, 2, 3...">
+
+    <label>Notas de adjudicación</label>
+    <textarea id="s3_notas_adj" placeholder="Motivo de discordancia, datos adicionales considerados, observaciones..."></textarea>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Datos del neurólogo</div>
+    <div class="row2">
+      <div><label>Estado del registro</label>
+        <select id="s3_estado">
+          <option value="Pendiente adjudicación">Pendiente adjudicación</option>
+          <option value="Adjudicado">Adjudicado — cerrado</option>
+        </select>
+      </div>
+      <div><label>Hora fin formulario</label><input type="time" id="s3_hora_fin"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PANTALLA 4: CONFIRMACIÓN ══════════ -->
+<div class="screen" id="screen4">
+  <div class="alert alert-success" id="confirmMsg">✅ Registro guardado correctamente.</div>
+  <div id="syncBadge"></div>
+  <div class="card"><div class="card-title">Resumen del caso</div><div id="summaryContent"></div></div>
+  <button class="btn btn-accent" onclick="exportSingleCSV()">⬇ Exportar este registro (CSV)</button>
+  <button class="btn btn-secondary" onclick="window.print()">🖨 Imprimir</button>
+  <button class="btn btn-outline" onclick="newRecord()">+ Nueva evaluación</button>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav" id="bottomNav">
+  <button class="btn btn-outline" id="btnBack" onclick="goBack()" style="display:none;">← Atrás</button>
+  <button class="btn btn-primary" id="btnNext" onclick="goNext()">Continuar →</button>
+</div>
+<button class="btn btn-accent" id="installBtn" style="display:none;position:fixed;bottom:80px;left:16px;right:16px;z-index:200;" onclick="installApp()">📲 Instalar en mi teléfono</button>
+
+<script>
+
+
+// ── SISTEMA DE IDENTIFICACIÓN POR GMAIL ────────────────────────────────
+const STORAGE_KEY_USER = 'neu_study_user';
+
+function loadUser() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY_USER) || 'null'); }
+  catch(e) { return null; }
+}
+function saveUser(u) { localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(u)); }
+function clearUser() { localStorage.removeItem(STORAGE_KEY_USER); }
+
+function isValidGmail(email) {
+  return /^[^\s@]+@gmail\.com$/i.test(email.trim());
+}
+function generateCode(role, email) {
+  const initials = email.split('@')[0].replace(/[^a-zA-Z]/g,'').toUpperCase().slice(0,3);
+  return role + '-' + initials;
+}
+function showLoginScreen() {
+  const el = document.getElementById('loginOverlay');
+  if (el) el.style.display = 'flex';
+}
+function hideLoginScreen() {
+  const el = document.getElementById('loginOverlay');
+  if (el) el.style.display = 'none';
+}
+function submitLogin() {
+  const email = (document.getElementById('loginEmail')||{}).value||'';
+  const name  = (document.getElementById('loginName')||{}).value||'';
+  const role  = (document.getElementById('loginRole')||{}).value||'';
+  const err   = document.getElementById('loginError');
+
+  if (!isValidGmail(email.trim())) {
+    if(err) err.textContent = '⚠ Ingresa un correo Gmail válido (@gmail.com)';
+    return;
+  }
+  if (name.trim().length < 4) {
+    if(err) err.textContent = '⚠ Ingresa tu nombre completo';
+    return;
+  }
+  if (!role) {
+    if(err) err.textContent = '⚠ Selecciona tu rol en el estudio';
+    return;
+  }
+  if(err) err.textContent = '';
+
+  const user = {
+    email: email.trim(),
+    name:  name.trim(),
+    role,
+    code:  generateCode(role, email.trim()),
+    registeredAt: new Date().toISOString()
+  };
+  saveUser(user);
+  // También guardar en clave maestra del portal
+  localStorage.setItem('hlev_study_user_2026', JSON.stringify(user));
+  applyUserToForm(user);
+  hideLoginScreen();
+}
+function applyUserToForm(user) {
+  // Rellenar campos de evaluador automáticamente (solo lectura)
+  const fieldMap = {
+    's0_evaluador':         user.code,
+    'ev_codigo':            user.code,
+    'ev_nombre':            user.name,
+    's0_neurologo_codigo':  user.code,
+    's0_neurologo_nombre':  user.name,
+    's0_coordinador':       user.code,
+  };
+  Object.entries(fieldMap).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.value    = val;
+      el.readOnly = true;
+      el.style.background  = '#f0f8f0';
+      el.style.color       = '#1a4a1a';
+      el.style.fontWeight  = '600';
+    }
+  });
+  // Mostrar badge de usuario en el header
+  const badge = document.getElementById('userBadge');
+  if (badge) {
+    badge.innerHTML =
+      `<span style="font-size:11px;opacity:0.9">👤 ${user.name}</span>` +
+      `<span style="font-size:10px;opacity:0.7;margin-left:6px">${user.code}</span>` +
+      `<button onclick="logoutUser()" style="background:rgba(255,255,255,0.2);border:none;` +
+      `color:white;font-size:10px;padding:2px 8px;border-radius:4px;margin-left:8px;cursor:pointer;">` +
+      `Cambiar</button>`;
+  }
+}
+function logoutUser() {
+  if (!confirm('¿Cambiar de usuario?\n\nLos registros ya guardados NO se borran.')) return;
+  clearUser();
+  location.reload();
+}
+function loadPortalSession() {
+  const keys = ['hlev_study_user_2026', 'neu_study_user'];
+  for (const key of keys) {
+    try {
+      const data = localStorage.getItem(key);
+      if (data) {
+        const user = JSON.parse(data);
+        if (user && user.email && user.name && user.code) return user;
+      }
+    } catch(e) {}
+  }
+  return null;
+}
+
+// ── CONFIGURACIÓN GOOGLE SHEETS ──────────────────────────────────────
+// ▼ PEGAR AQUÍ LA URL QUE GENERA GOOGLE APPS SCRIPT (termina en /exec) ▼
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyzvGrCJ47xSH3SXAdsAGwcM81AoQQii3PEqogjhaEIoCGHGP7q3hjDp-hAQXHl5CrT/exec";
+const SOURCE = "neurologo";
+
+async function syncToSheets(record) {
+  if (!WEBHOOK_URL || WEBHOOK_URL.includes("PEGAR_AQUI")) return { ok: false, error: "noconfig" };
+  try {
+    const r = await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source: SOURCE, record })
+    });
+    return await r.json();
+  } catch(e) { return { ok: false, error: "offline" }; }
+}
+function showSyncBadge(status) {
+  const el = document.getElementById("syncBadge");
+  if (!el) return;
+  const cfg = {
+    syncing: ["⏳ Sincronizando con Google Sheets…", "#FFF3CD", "#7A4F00"],
+    ok:      ["☁️ Guardado en Google Sheets ✓",       "#D4EDDA", "#155724"],
+    offline: ["📱 Sin internet — guardado solo en este dispositivo", "#F8D7DA", "#721C24"],
+    noconfig:["⚙️ Configura el WEBHOOK_URL para activar Google Sheets", "#FFF3CD", "#7A4F00"],
+  };
+  const [text, bg, color] = cfg[status] || cfg.offline;
+  el.innerHTML = `<div style="padding:10px 14px;border-radius:8px;background:${bg};color:${color};font-size:13px;font-weight:600;margin-top:10px;">${text}</div>`;
+}
+
+let currentScreen = 0;
+let toggleState = {};
+let deferredPrompt = null;
+let records = JSON.parse(localStorage.getItem('neu_records') || '[]');
+
+// ── PWA ──
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').style.display='block'; document.getElementById('installBanner').style.display='flex'; });
+async function installApp() {
+  if (!deferredPrompt) { alert('iPhone/iPad: Compartir (⬆) → "Añadir a inicio"\nAndroid: menú ⋮ → "Instalar aplicación"'); return; }
+  deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null;
+  document.getElementById('installBtn').style.display='none';
+}
+
+// ── NAVIGATION ──
+function goToScreen(n) {
+  if (!validateScreen(currentScreen)) return;
+  document.getElementById('screen'+currentScreen).classList.remove('active');
+  currentScreen = n;
+  document.getElementById('screen'+n).classList.add('active');
+  updateNav(); updateStepBar(); window.scrollTo(0,0);
+}
+function goNext() { if (currentScreen < 3) goToScreen(currentScreen+1); else saveRecord(); }
+function goBack() { if (currentScreen > 0) goToScreen(currentScreen-1); }
+function updateNav() {
+  document.getElementById('btnBack').style.display = currentScreen > 0 ? 'block' : 'none';
+  const btn = document.getElementById('btnNext');
+  if (currentScreen === 3) { btn.textContent = '💾 Guardar registro'; btn.className = 'btn btn-success'; }
+  else { btn.textContent = 'Continuar →'; btn.className = 'btn btn-primary'; }
+  document.getElementById('bottomNav').style.display = currentScreen === 4 ? 'none' : 'flex';
+}
+function updateStepBar() {
+  for (let i=0; i<5; i++) {
+    const d = document.getElementById('dot'+i);
+    d.className = 'step-dot' + (i<currentScreen?' done':i===currentScreen?' active':'');
+  }
+}
+function validateScreen(n) {
+  if (n===0 && !document.getElementById('s0_id').value.trim()) { alert('Ingrese el ID del paciente'); return false; }
+  return true;
+}
+
+// ── TABS ──
+function switchTab(showId, hideId, el) {
+  document.getElementById(showId).style.display='block';
+  document.getElementById(hideId).style.display='none';
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  if (showId==='tabRegistros') renderRecords();
+}
+
+// ── TOGGLES ──
+function selectToggle(group, val, cls) {
+  toggleState[group] = val;
+  // clear all buttons in group
+  document.querySelectorAll(`[id^="${group}_"]`).forEach(btn => {
+    btn.className = 'toggle-btn';
+  });
+  const el = document.getElementById(`${group}_${val}`);
+  if (el) el.className = `toggle-btn ${cls}`;
+}
+
+// ── NIHSS ──
+const nihssIds = ['n1a','n1b','n1c','n2','n3','n4','n5a','n5b','n6a','n6b','n7','n8','n9','n10','n11'];
+function updateNIHSS() {
+  let total = 0; let valid = true;
+  nihssIds.forEach(id => {
+    const v = parseInt(document.getElementById(id).value);
+    if (!isNaN(v)) total += v; else valid = false;
+  });
+  document.getElementById('nihssTotal').textContent = total;
+  let sev='', color='';
+  if (total===0) { sev='Sin déficit'; color='#2a8a4a'; }
+  else if (total<=4) { sev='Leve'; color='#2a8a4a'; }
+  else if (total<=15) { sev='Moderado'; color='#e67e22'; }
+  else if (total<=20) { sev='Grave'; color='#e74c3c'; }
+  else { sev='Muy grave'; color='#c0392b'; }
+  const s = document.getElementById('nihssSeverity');
+  s.textContent = sev; s.style.background = color; s.style.color = 'white';
+}
+
+// ── SAVE ──
+function getNIHSSTotal() { return nihssIds.reduce((s,id)=>s+(parseInt(document.getElementById(id).value)||0),0); }
+function getV(id) { const el=document.getElementById(id); return el?el.value:''; }
+
+function saveRecord() {
+  const record = {
+    id: getV('s0_id').trim(),
+    fecha: getV('s0_fecha'),
+    hora_eval: getV('s0_hora_eval'),
+    neurologo_codigo: getV('s0_neurologo_codigo'),
+    neurologo_nombre: getV('s0_neurologo_nombre'),
+    // Clínica
+    impresion_dx_ini: toggleState.dx || '',
+    localizacion: getV('s1_localizacion'),
+    territorio_clinico: toggleState.terr || '',
+    sintomas: getV('s1_sintomas'),
+    ait_previo: getV('s1_ait_prev'),
+    fa: getV('s1_fa'),
+    hta: getV('s1_hta'),
+    dm: getV('s1_dm'),
+    // NIHSS
+    nihss_1a: getV('n1a'), nihss_1b: getV('n1b'), nihss_1c: getV('n1c'),
+    nihss_2: getV('n2'), nihss_3: getV('n3'), nihss_4: getV('n4'),
+    nihss_5a: getV('n5a'), nihss_5b: getV('n5b'),
+    nihss_6a: getV('n6a'), nihss_6b: getV('n6b'),
+    nihss_7: getV('n7'), nihss_8: getV('n8'), nihss_9: getV('n9'),
+    nihss_10: getV('n10'), nihss_11: getV('n11'),
+    nihss_total: getNIHSSTotal(),
+    // Neuroimagen
+    tipo_img: getV('s2_tipo_img'),
+    hora_img: getV('s2_hora_img'),
+    resultado_tc: getV('s2_result_tc'),
+    resultado_rm: getV('s2_result_rm'),
+    toast: getV('s2_toast'),
+    territorio_img: getV('s2_territorio_img'),
+    // Adjudicación
+    dx_definitivo: toggleState.adj || '',
+    tipo_ictus: getV('s3_tipo_ictus'),
+    territorio_final: toggleState.terr_f || '',
+    concordancia_neuro: toggleState.conc || '',
+    evaluadores_adj: getV('s3_evaluadores_adj'),
+    semana_estudio: getV('s3_semana'),
+    notas_adj: getV('s3_notas_adj'),
+    estado: getV('s3_estado'),
+    hora_fin: getV('s3_hora_fin'),
+    timestamp: new Date().toISOString()
+  };
+  records.push(record);
+  localStorage.setItem('neu_records', JSON.stringify(records));
+  showSummary(record);
+  goToScreen(4);
+  // Sincronizar con Google Sheets
+  showSyncBadge('syncing');
+  syncToSheets(record).then(res => {
+    if (res.ok) showSyncBadge('ok');
+    else if (res.error === 'noconfig') showSyncBadge('noconfig');
+    else showSyncBadge('offline');
+  });
+}
+
+function showSummary(r) {
+  const dxColor = r.dx_definitivo.includes('ictus')||r.dx_definitivo.includes('ictus_prob') ? '#2a6a8a' : r.dx_definitivo==='mimic' ? '#8a6a1a' : '#5a5a5a';
+  document.getElementById('summaryContent').innerHTML = `
+    <div style="margin-bottom:8px"><strong>Paciente:</strong> ${r.id} &nbsp;|&nbsp; <strong>Fecha:</strong> ${r.fecha}</div>
+    <div style="margin-bottom:8px"><strong>Neurólogo:</strong> ${r.neurologo_nombre} (${r.neurologo_codigo})</div>
+    <div style="margin-bottom:8px"><strong>Impresión dx inicial:</strong> ${r.impresion_dx_ini||'—'} &nbsp;|&nbsp; <strong>Territorio clínico:</strong> ${r.territorio_clinico||'—'}</div>
+    <div style="margin-bottom:8px"><strong>NIHSS admisión:</strong> <span style="font-size:20px;font-weight:800;color:var(--green-dark)">${r.nihss_total}</span> / 42</div>
+    <div style="margin-bottom:8px"><strong>Neuroimagen:</strong> ${r.tipo_img||'—'} → TC: ${r.resultado_tc||'—'}</div>
+    <div style="margin-bottom:8px"><strong>TOAST:</strong> ${r.toast||'—'} &nbsp;|&nbsp; <strong>Territorio imagen:</strong> ${r.territorio_img||'—'}</div>
+    <div style="text-align:center;margin-top:12px">
+      <span style="background:${dxColor};color:white;padding:8px 22px;border-radius:20px;font-weight:800;font-size:15px">${r.dx_definitivo||'Pendiente adjudicación'}</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);text-align:center">Estado: ${r.estado}</div>
+  `;
+}
+
+// ── RECORDS ──
+function renderRecords() {
+  const el = document.getElementById('recordsList');
+  if (!records.length) { el.innerHTML='<div class="empty-state"><div class="icon">🧠</div><p>No hay evaluaciones aún.</p></div>'; return; }
+  el.innerHTML = records.map((r,origIdx)=>({r,origIdx})).slice().reverse().map(({r,origIdx})=>`
+    <div class="record-item">
+      <div class="record-header">
+        <div class="record-id">${r.id}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="record-badge ${r.dx_definitivo.includes('ictus')?'badge-ictus':r.dx_definitivo==='mimic'?'badge-mimic':r.dx_definitivo.includes('ait')?'badge-ait':'badge-nd'}">${r.dx_definitivo||'Pendiente'}</div>
+          <button onclick="deleteRecord(${origIdx})" style="background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:6px;font-size:18px;color:#c0392b;">🗑</button>
+        </div>
+      </div>
+      <div class="record-detail">${r.fecha} · ${r.neurologo_codigo} · ${r.estado}</div>
+      <div class="record-score">NIHSS: ${r.nihss_total} &nbsp;|&nbsp; Territorio: ${r.territorio_final||r.territorio_clinico||'—'} &nbsp;|&nbsp; TOAST: ${r.toast||'—'}</div>
+    </div>`).join('');
+}
+
+function deleteRecord(origIdx) {
+  const r = records[origIdx]; if (!r) return;
+  if (!confirm(`¿Eliminar evaluación de ${r.id} del ${r.fecha}?\n\nEsta acción no se puede deshacer.`)) return;
+  records.splice(origIdx,1);
+  localStorage.setItem('neu_records', JSON.stringify(records));
+  renderRecords();
+}
+
+// ── CSV ──
+const CSV_HEADERS = [
+  'ID_Paciente','Fecha','Hora_Eval','Neurologo_Codigo','Neurologo_Nombre',
+  'Impresion_Dx_Inicial','Localizacion','Territorio_Clinico','Sintomas','AIT_Previo','FA','HTA','DM',
+  'NIHSS_1a','NIHSS_1b','NIHSS_1c','NIHSS_2','NIHSS_3','NIHSS_4',
+  'NIHSS_5a','NIHSS_5b','NIHSS_6a','NIHSS_6b','NIHSS_7','NIHSS_8','NIHSS_9','NIHSS_10','NIHSS_11',
+  'NIHSS_Total',
+  'Tipo_Neuroimagen','Hora_Neuroimagen','Resultado_TC','Resultado_RM_DWI','Clasificacion_TOAST','Territorio_Imagen',
+  'Dx_Definitivo','Tipo_Ictus','Territorio_Final','Concordancia_Neuros','Evaluadores_Adj','Semana_Estudio','Notas_Adj',
+  'Estado_Registro','Hora_Fin','Timestamp'
+];
+function recordToRow(r) {
+  const v = x => (x===null||x===undefined)?'':String(x).replace(/,/g,';').replace(/\n/g,' ');
+  return [
+    v(r.id),v(r.fecha),v(r.hora_eval),v(r.neurologo_codigo),v(r.neurologo_nombre),
+    v(r.impresion_dx_ini),v(r.localizacion),v(r.territorio_clinico),v(r.sintomas),v(r.ait_previo),v(r.fa),v(r.hta),v(r.dm),
+    v(r.nihss_1a),v(r.nihss_1b),v(r.nihss_1c),v(r.nihss_2),v(r.nihss_3),v(r.nihss_4),
+    v(r.nihss_5a),v(r.nihss_5b),v(r.nihss_6a),v(r.nihss_6b),v(r.nihss_7),v(r.nihss_8),v(r.nihss_9),v(r.nihss_10),v(r.nihss_11),
+    v(r.nihss_total),
+    v(r.tipo_img),v(r.hora_img),v(r.resultado_tc),v(r.resultado_rm),v(r.toast),v(r.territorio_img),
+    v(r.dx_definitivo),v(r.tipo_ictus),v(r.territorio_final),v(r.concordancia_neuro),v(r.evaluadores_adj),v(r.semana_estudio),v(r.notas_adj),
+    v(r.estado),v(r.hora_fin),v(r.timestamp)
+  ].join(',');
+}
+function exportCSV() {
+  if (!records.length) { alert('No hay registros para exportar.'); return; }
+  downloadBlob([CSV_HEADERS.join(','),...records.map(recordToRow)].join('\n'), `NEU_BD_${today()}.csv`);
+}
+function exportSingleCSV() {
+  const r = records[records.length-1];
+  downloadBlob([CSV_HEADERS.join(','),recordToRow(r)].join('\n'), `NEU_${r.id}_${today()}.csv`);
+}
+function downloadBlob(content, filename) {
+  const blob = new Blob(['\uFEFF'+content], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+}
+function today() { return new Date().toISOString().slice(0,10).replace(/-/g,''); }
+function importCSV() { document.getElementById('csvFileInput').click(); }
+function handleImport(e) {
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const lines=ev.target.result.replace(/\uFEFF/,'').split('\n').filter(l=>l.trim());
+    if(lines.length<2){alert('CSV vacío.');return;}
+    const headers=lines[0].split(',');
+    let imported=0;
+    for(let i=1;i<lines.length;i++){
+      const vals=lines[i].split(',');
+      const obj={}; headers.forEach((h,j)=>obj[h.trim()]=vals[j]||'');
+      const rec={
+        id:obj.ID_Paciente,fecha:obj.Fecha,hora_eval:obj.Hora_Eval,
+        neurologo_codigo:obj.Neurologo_Codigo,neurologo_nombre:obj.Neurologo_Nombre,
+        impresion_dx_ini:obj.Impresion_Dx_Inicial,localizacion:obj.Localizacion,
+        territorio_clinico:obj.Territorio_Clinico,sintomas:obj.Sintomas,
+        ait_previo:obj.AIT_Previo,fa:obj.FA,hta:obj.HTA,dm:obj.DM,
+        nihss_1a:obj.NIHSS_1a,nihss_1b:obj.NIHSS_1b,nihss_1c:obj.NIHSS_1c,
+        nihss_2:obj.NIHSS_2,nihss_3:obj.NIHSS_3,nihss_4:obj.NIHSS_4,
+        nihss_5a:obj.NIHSS_5a,nihss_5b:obj.NIHSS_5b,nihss_6a:obj.NIHSS_6a,nihss_6b:obj.NIHSS_6b,
+        nihss_7:obj.NIHSS_7,nihss_8:obj.NIHSS_8,nihss_9:obj.NIHSS_9,
+        nihss_10:obj.NIHSS_10,nihss_11:obj.NIHSS_11,nihss_total:obj.NIHSS_Total,
+        tipo_img:obj.Tipo_Neuroimagen,hora_img:obj.Hora_Neuroimagen,
+        resultado_tc:obj.Resultado_TC,resultado_rm:obj.Resultado_RM_DWI,
+        toast:obj.Clasificacion_TOAST,territorio_img:obj.Territorio_Imagen,
+        dx_definitivo:obj.Dx_Definitivo,tipo_ictus:obj.Tipo_Ictus,territorio_final:obj.Territorio_Final,
+        concordancia_neuro:obj.Concordancia_Neuros,evaluadores_adj:obj.Evaluadores_Adj,
+        semana_estudio:obj.Semana_Estudio,notas_adj:obj.Notas_Adj,
+        estado:obj.Estado_Registro,hora_fin:obj.Hora_Fin,timestamp:obj.Timestamp||new Date().toISOString()
+      };
+      if(rec.id&&!records.find(x=>x.id===rec.id&&x.timestamp===rec.timestamp)){records.push(rec);imported++;}
+    }
+    localStorage.setItem('neu_records',JSON.stringify(records));
+    alert(`✅ ${imported} registro(s) importado(s).`);
+    renderRecords();
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+function newRecord() {
+  toggleState={};
+  document.querySelectorAll('.toggle-btn').forEach(b=>b.className='toggle-btn');
+  nihssIds.forEach(id=>document.getElementById(id).value='');
+  document.getElementById('nihssTotal').textContent='—';
+  document.getElementById('nihssSeverity').textContent='—';
+  document.querySelectorAll('input[type="text"],input[type="time"],input[type="date"],select,textarea').forEach(el=>el.value='');
+  document.getElementById('s0_fecha').value=new Date().toISOString().slice(0,10);
+  document.getElementById('s3_estado').value='Pendiente adjudicación';
+  goToScreen(0);
+}
+window.addEventListener('load',()=>{
+  document.getElementById('s0_fecha').value=new Date().toISOString().slice(0,10);
+  updateNav(); updateStepBar();
+});
+</script>
+</body>
+</html>

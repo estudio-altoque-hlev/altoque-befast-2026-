@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="HLEV Estudio">
+<meta name="theme-color" content="#1a3a5c">
+<title>Estudio ALTOQUE vs. BEFAST 2026 — Portal del Evaluador</title>
+<style>
+  :root {
+    --navy:     #1a3a5c;
+    --navy-dk:  #0f2540;
+    --teal:     #0d7c8f;
+    --gold:     #f5b840;
+    --green:    #2a8a4a;
+    --red:      #8b1a1a;
+    --purple:   #5a2d7a;
+    --bg:       #f0f4f8;
+    --card:     #ffffff;
+    --border:   #d0dce8;
+    --text:     #1a2535;
+    --muted:    #5a6a7e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--navy-dk) 0%, var(--navy) 60%, #1a4a6a 100%);
+    color: white; padding: 28px 20px 24px; text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  }
+  .header-logo { font-size: 13px; font-weight: 800; letter-spacing: 2px; color: var(--gold); margin-bottom: 8px; }
+  .header h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .header-sub { font-size: 13px; opacity: 0.75; line-height: 1.5; }
+  .header-badge {
+    display: inline-block; background: rgba(245,184,64,0.15); border: 1px solid var(--gold);
+    color: var(--gold); font-size: 11px; font-weight: 700; padding: 4px 12px;
+    border-radius: 20px; margin-top: 12px; letter-spacing: 0.5px;
+  }
+
+  /* MAIN */
+  .main { padding: 20px 16px 40px; max-width: 500px; margin: 0 auto; }
+
+  /* ALERT */
+  .alert { padding: 13px 15px; border-radius: 10px; font-size: 13px; margin-bottom: 18px; line-height: 1.55; font-weight: 500; }
+  .alert-info    { background: #d1ecf1; border: 1px solid #0d7c8f; color: #0a4a55; }
+  .alert-warning { background: #fff3cd; border: 1px solid #f5b840; color: #7a4f00; }
+
+  /* SECTION */
+  .section-title {
+    font-size: 11px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--muted); margin: 22px 0 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* APP CARDS */
+  .app-card {
+    background: var(--card); border-radius: 14px; margin-bottom: 12px;
+    box-shadow: 0 2px 12px rgba(26,58,92,0.10); border: 1px solid var(--border);
+    overflow: hidden; text-decoration: none; display: block;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .app-card:active { transform: scale(0.98); }
+  .app-card-inner { display: flex; align-items: center; gap: 0; }
+  .app-color-bar { width: 6px; flex-shrink: 0; align-self: stretch; }
+  .app-icon {
+    width: 56px; height: 56px; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-size: 22px;
+    flex-shrink: 0; margin: 14px 14px 14px 12px;
+  }
+  .app-info { flex: 1; padding: 14px 12px 14px 0; }
+  .app-tag { font-size: 10px; font-weight: 800; letter-spacing: 1px; margin-bottom: 3px; }
+  .app-name { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .app-desc { font-size: 12px; color: var(--muted); line-height: 1.45; }
+  .app-arrow { font-size: 18px; color: var(--border); padding-right: 14px; flex-shrink: 0; }
+
+  /* USER BOX */
+  .user-box {
+    background: var(--card); border-radius: 14px; padding: 16px;
+    border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(26,58,92,0.08);
+    margin-bottom: 18px;
+  }
+  .user-box-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .user-row { display: flex; align-items: center; gap: 12px; }
+  .user-avatar {
+    width: 44px; height: 44px; border-radius: 50%; background: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800; color: white; flex-shrink: 0;
+  }
+  .user-name { font-size: 15px; font-weight: 700; color: var(--text); }
+  .user-email { font-size: 12px; color: var(--muted); }
+  .user-code { font-size: 11px; font-weight: 700; color: var(--teal); margin-top: 2px; }
+  .btn-logout { background: none; border: 1px solid var(--border); color: var(--muted); font-size: 12px; padding: 5px 10px; border-radius: 6px; cursor: pointer; margin-left: auto; flex-shrink: 0; }
+
+  /* LOGIN FORM */
+  .login-card {
+    background: var(--card); border-radius: 14px; overflow: hidden;
+    border: 1px solid var(--border); box-shadow: 0 4px 24px rgba(26,58,92,0.12);
+    margin-bottom: 18px;
+  }
+  .login-header { background: var(--navy); padding: 16px 18px; }
+  .login-header h2 { font-size: 16px; font-weight: 700; color: white; }
+  .login-header p  { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 3px; }
+  .login-body { padding: 18px; }
+  .field-label { font-size: 13px; font-weight: 600; color: var(--text); display: block; margin-bottom: 5px; }
+  .field-input {
+    width: 100%; padding: 12px 14px; border: 1.5px solid var(--border);
+    border-radius: 9px; font-size: 15px; color: var(--text); background: #f8fafc;
+    appearance: none; -webkit-appearance: none; outline: none;
+    transition: border-color 0.2s; margin-bottom: 14px;
+  }
+  .field-input:focus { border-color: var(--teal); background: white; }
+  .btn-login {
+    width: 100%; padding: 14px; background: linear-gradient(135deg, var(--navy), var(--teal));
+    color: white; border: none; border-radius: 10px; font-size: 16px;
+    font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+  }
+  .btn-login:active { opacity: 0.88; }
+  .field-error { font-size: 12px; color: var(--red); font-weight: 600; min-height: 18px; margin-bottom: 10px; }
+  .privacy-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.5; }
+
+  /* FOOTER */
+  .footer { text-align: center; padding: 20px; font-size: 11px; color: var(--muted); line-height: 1.8; }
+  .footer strong { color: var(--navy); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">HOSPITAL LIMA ESTE VITARTE</div>
+  <h1>Estudio ALTOQUE vs. BEFAST</h1>
+  <div class="header-sub">No inferioridad diagnóstica en reconocimiento de ictus agudo<br>Servicio de Emergencias · Lima, Perú · 2026</div>
+  <div class="header-badge">Portal del Evaluador</div>
+</div>
+
+<div class="main">
+
+  <!-- SECCIÓN IDENTIFICACIÓN -->
+  <div class="section-title">Tu identificación</div>
+
+  <!-- LOGIN FORM (visible si no hay usuario) -->
+  <div id="loginSection">
+    <div class="login-card">
+      <div class="login-header">
+        <h2>Registro de evaluador</h2>
+        <p>Solo necesitas completar esto una vez en este dispositivo</p>
+      </div>
+      <div class="login-body">
+        <label class="field-label">Correo Gmail</label>
+        <input class="field-input" type="email" id="regEmail" placeholder="tucorreo@gmail.com">
+
+        <label class="field-label">Nombre completo</label>
+        <input class="field-input" type="text" id="regName" placeholder="Dr. / Dra. Apellido Nombre">
+
+        <label class="field-label">Rol en el estudio</label>
+        <select class="field-input" id="regRole">
+          <option value="">Seleccionar rol...</option>
+          <option value="EVALT">Evaluador ALTOQUE</option>
+          <option value="EVBEF">Evaluador BEFAST</option>
+          <option value="NEU">Neurólogo consultor</option>
+          <option value="COORD">Coordinador de datos</option>
+          <option value="IP">Investigador Principal</option>
+        </select>
+
+        <div class="field-error" id="regError"></div>
+        <button class="btn-login" onclick="submitRegister()">Confirmar y acceder al estudio →</button>
+        <div class="privacy-note">Tu correo se guarda únicamente en este dispositivo.<br>No se comparte con terceros.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USER BOX (visible si ya hay usuario) -->
+  <div id="userSection" style="display:none;">
+    <div class="user-box">
+      <div class="user-box-title">Sesión activa</div>
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <div>
+          <div class="user-name" id="userName">—</div>
+          <div class="user-email" id="userEmail">—</div>
+          <div class="user-code" id="userCode">—</div>
+        </div>
+        <button class="btn-logout" onclick="logoutUser()">Cambiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN APLICATIVOS -->
+  <div class="section-title">Formularios del estudio</div>
+
+  <div class="alert alert-warning">
+    ⚠ Abrir únicamente el formulario correspondiente a tu rol. El cegamiento es un requisito del protocolo.
+  </div>
+
+  <!-- ALTOQUE -->
+  <a class="app-card" href="ALTOQUE_AppMovil.html" id="card_EVALT">
+    <div class="app-card-inner">
+      <div class="app-color-bar" style="background:#8b1a1a;"></div>
+      <div class="app-icon" style="background:#fdf0f0;">🅰</div>
+      <div class="app-info">
+        <div class="app-tag" style="color:#8b1a1a;">ALTOQUE-01</div>
+        <div class="app-name">Escala ALTOQUE</div>
+        <div class="app-desc">Evaluador ALTOQUE · Ítems A/L/T/O/QUE · Resultado y tiempos</div>
+      </div>
+      <div class="app-arrow">›</div>
+    </div>
+  </a>
+
+  <!-- BEFAST -->
+  <a class="app-card" href="BEFAST_AppMovil.html" id="card_EVBEF">
+    <div class="app-card-inner">
+      <div class="app-color-bar" style="background:#0d7c8f;"></div>
+      <div class="app-icon" style="background:#f0fafc;">🅱</div>
+      <div class="app-info">
+        <div class="app-tag" style="color:#0d7c8f;">BEFAST-01</div>
+        <div class="app-name">Escala BEFAST</div>
+        <div class="app-desc">Evaluador BEFAST · Ítems B/E/F/A/S/T · Resultado y tiempos</div>
+      </div>
+      <div class="app-arrow">›</div>
+    </div>
+  </a>
+
+  <!-- NEURÓLOGO -->
+  <a class="app-card" href="NEUROLOGO_AppMovil.html" id="card_NEU">
+    <div class="app-card-inner">
+      <div class="app-color-bar" style="background:#2a5c2a;"></div>
+      <div class="app-icon" style="background:#f0fff0;">🧠</div>
+      <div class="app-info">
+        <div class="app-tag" style="color:#2a5c2a;">NEU-01</div>
+        <div class="app-name">Evaluación Neurológica</div>
+        <div class="app-desc">Neurólogo consultor · NIHSS · Neuroimagen · Adjudicación</div>
+      </div>
+      <div class="app-arrow">›</div>
+    </div>
+  </a>
+
+  <!-- SEGUIMIENTO -->
+  <a class="app-card" href="SEGUIMIENTO_AppMovil.html" id="card_COORD">
+    <div class="app-card-inner">
+      <div class="app-color-bar" style="background:#5a2d7a;"></div>
+      <div class="app-icon" style="background:#faf0ff;">📞</div>
+      <div class="app-info">
+        <div class="app-tag" style="color:#5a2d7a;">SEG-01</div>
+        <div class="app-name">Seguimiento 48-72 h</div>
+        <div class="app-desc">Coordinador de datos · Estado paciente · mRS · Consentimiento</div>
+      </div>
+      <div class="app-arrow">›</div>
+    </div>
+  </a>
+
+  <!-- INFO -->
+  <div class="section-title" style="margin-top:28px;">Información del estudio</div>
+  <div class="alert alert-info">
+    <strong>Estudio ALTOQUE vs. BEFAST 2026</strong><br>
+    No inferioridad diagnóstica de la escala ALTOQUE frente a BEFAST en el reconocimiento del ictus agudo en el servicio de urgencias.<br><br>
+    <strong>N meta:</strong> 334 pacientes &nbsp;·&nbsp; <strong>Diseño:</strong> Prospectivo observacional pareado &nbsp;·&nbsp; <strong>Sede:</strong> HLEV
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <strong>Hospital Lima Este Vitarte</strong><br>
+  Servicio de Emergencias · Lima, Perú<br>
+  Estudio ALTOQUE vs. BEFAST · 2026<br>
+  Conforme a STARD 2015 · QUADAS-2 · COSMIN
+</div>
+
+<script>
+const STORAGE_KEY = 'hlev_study_user_2026';
+
+function loadUser() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); }
+  catch(e) { return null; }
+}
+function saveUser(u) { localStorage.setItem(STORAGE_KEY, JSON.stringify(u)); }
+function clearUser() { localStorage.removeItem(STORAGE_KEY); }
+
+function isValidGmail(e) { return /^[^\s@]+@gmail\.com$/i.test(e.trim()); }
+
+function generateCode(role, email) {
+  const initials = email.split('@')[0].replace(/[^a-zA-Z]/g,'').toUpperCase().slice(0,3);
+  return role + '-' + initials;
+}
+
+function getInitials(name) {
+  return name.trim().split(/\s+/).map(w=>w[0]||'').join('').toUpperCase().slice(0,2) || '?';
+}
+
+function submitRegister() {
+  const email = document.getElementById('regEmail').value.trim();
+  const name  = document.getElementById('regName').value.trim();
+  const role  = document.getElementById('regRole').value;
+  const err   = document.getElementById('regError');
+
+  if (!isValidGmail(email)) { err.textContent = '⚠ Ingresa un correo Gmail válido (@gmail.com)'; return; }
+  if (name.length < 5)      { err.textContent = '⚠ Ingresa tu nombre completo'; return; }
+  if (!role)                { err.textContent = '⚠ Selecciona tu rol en el estudio'; return; }
+  err.textContent = '';
+
+  const user = { email, name, role, code: generateCode(role, email), registeredAt: new Date().toISOString() };
+  saveUser(user);
+  applyUser(user);
+}
+
+function applyUser(user) {
+  // Mostrar sección de usuario
+  document.getElementById('loginSection').style.display = 'none';
+  document.getElementById('userSection').style.display  = 'block';
+  document.getElementById('userAvatar').textContent = getInitials(user.name);
+  document.getElementById('userName').textContent   = user.name;
+  document.getElementById('userEmail').textContent  = user.email;
+  document.getElementById('userCode').textContent   = '🔑 Código: ' + user.code + '  ·  Rol: ' + roleLabel(user.role);
+
+  // Resaltar la tarjeta del rol del usuario y atenuar las otras
+  const roleMap = { EVALT: 'card_EVALT', EVBEF: 'card_EVBEF', NEU: 'card_NEU', COORD: 'card_COORD', IP: null };
+  Object.entries(roleMap).forEach(([r, cardId]) => {
+    if (!cardId) return;
+    const card = document.getElementById(cardId);
+    if (r === user.role) {
+      card.style.boxShadow = '0 0 0 3px ' + roleColor(r) + ', 0 4px 16px rgba(0,0,0,0.12)';
+      card.style.borderColor = roleColor(r);
+    } else {
+      card.style.opacity = '0.45';
+    }
+  });
+
+  // Guardar datos del usuario en localStorage para que los apps los lean
+  // Clave maestra que leen todos los apps
+  localStorage.setItem('hlev_study_user_2026', JSON.stringify(user));
+  // Compatibilidad individual por app
+  localStorage.setItem('altoque_study_user', JSON.stringify(user));
+  localStorage.setItem('befast_study_user',  JSON.stringify(user));
+  localStorage.setItem('neu_study_user',     JSON.stringify(user));
+  localStorage.setItem('seg_study_user',     JSON.stringify(user));
+  localStorage.setItem('befast_study_user',  JSON.stringify(user));
+  localStorage.setItem('neu_study_user',     JSON.stringify(user));
+  localStorage.setItem('seg_study_user',     JSON.stringify(user));
+}
+
+function roleLabel(role) {
+  const map = { EVALT:'Evaluador ALTOQUE', EVBEF:'Evaluador BEFAST', NEU:'Neurólogo', COORD:'Coordinador', IP:'Investigador Principal' };
+  return map[role] || role;
+}
+function roleColor(role) {
+  const map = { EVALT:'#8b1a1a', EVBEF:'#0d7c8f', NEU:'#2a5c2a', COORD:'#5a2d7a', IP:'#1a3a5c' };
+  return map[role] || '#1a3a5c';
+}
+
+function logoutUser() {
+  if (!confirm('¿Cambiar de usuario?\n\nLos registros ya guardados NO se borran.')) return;
+  clearUser();
+  location.reload();
+}
+
+// INIT
+window.addEventListener('load', () => {
+  const user = loadUser();
+  if (user) applyUser(user);
+  else document.getElementById('loginSection').style.display = 'block';
+});
+</script>
+</body>
+</html>

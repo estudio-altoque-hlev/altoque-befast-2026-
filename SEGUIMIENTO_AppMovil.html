@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SEG-01">
+<meta name="theme-color" content="#5a2d7a">
+<title>SEG-01 – Seguimiento 48-72 h</title>
+<style>
+  :root {
+    --purple:      #5a2d7a;
+    --purple-dark: #3a1d5a;
+    --purple-mid:  #7a3d9a;
+    --navy:        #1a3a5c;
+    --navy-dark:   #0f2540;
+    --teal:        #0d7c8f;
+    --gold:        #f5b840;
+    --green:       #2a8a4a;
+    --red:         #c0392b;
+    --red-light:   #e74c3c;
+    --bg:          #f5f0fa;
+    --card:        #ffffff;
+    --border:      #d5c8e8;
+    --text:        #1a2535;
+    --muted:       #6a5a7a;
+    --radius:      12px;
+    --shadow:      0 2px 12px rgba(90,45,122,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 90px; }
+
+  .header { background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple) 55%, var(--purple-mid) 100%); color: white; padding: 16px 18px 14px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(0,0,0,0.22); }
+  .header-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .header-badge { background: var(--gold); color: var(--navy-dark); font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 20px; letter-spacing: 1px; }
+  .header h1 { font-size: 18px; font-weight: 700; }
+  .header-sub { font-size: 11px; opacity: 0.78; line-height: 1.4; }
+  .step-bar { display: flex; gap: 4px; margin-top: 10px; }
+  .step-dot { flex: 1; height: 3px; background: rgba(255,255,255,0.25); border-radius: 2px; transition: background 0.3s; }
+  .step-dot.done { background: var(--gold); }
+  .step-dot.active { background: white; }
+
+  .screen { display: none; }
+  .screen.active { display: block; padding: 16px; }
+
+  .card { background: var(--card); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--purple); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; width: 3px; height: 14px; background: var(--purple); border-radius: 2px; display: inline-block; }
+
+  label { font-size: 13px; font-weight: 600; color: var(--text); display: block; margin-bottom: 5px; }
+  .hint { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-style: italic; }
+  input[type="text"],input[type="number"],input[type="time"],input[type="date"],select,textarea {
+    width: 100%; padding: 11px 13px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 15px; color: var(--text); background: #faf8fc; appearance: none; -webkit-appearance: none;
+    outline: none; transition: border-color 0.2s; margin-bottom: 12px;
+  }
+  input:focus,select:focus,textarea:focus { border-color: var(--purple); background: #fff; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  textarea { resize: vertical; min-height: 70px; }
+
+  /* TOGGLE */
+  .toggle-group { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .toggle-btn { flex: 1; min-width: 80px; padding: 10px 6px; border: 2px solid var(--border); border-radius: 8px; background: #faf8fc; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; text-align: center; transition: all 0.18s; user-select: none; }
+  .toggle-btn:active { transform: scale(0.96); }
+  .sel-yes   { background: var(--green); border-color: var(--green); color: white !important; }
+  .sel-no    { background: var(--red-light); border-color: var(--red); color: white !important; }
+  .sel-tel   { background: #2a6a8a; border-color: #1a5a7a; color: white !important; }
+  .sel-pres  { background: var(--purple); border-color: var(--purple-dark); color: white !important; }
+  .sel-alta  { background: var(--green); border-color: #1a6a3a; color: white !important; }
+  .sel-hosp  { background: #e67e22; border-color: #d35400; color: white !important; }
+  .sel-uci   { background: var(--red); border-color: var(--red); color: white !important; }
+  .sel-fall  { background: #2c3e50; border-color: #1a252f; color: white !important; }
+  .sel-ictus { background: #2a6a8a; border-color: #1a5a7a; color: white !important; }
+  .sel-mimic { background: #8a6a1a; border-color: #7a5a0a; color: white !important; }
+  .sel-ait   { background: #6a2a7a; border-color: #5a1a6a; color: white !important; }
+  .sel-nd    { background: #5a5a5a; border-color: #4a4a4a; color: white !important; }
+  .sel-perd  { background: var(--muted); border-color: #4a4a5a; color: white !important; }
+
+  /* TIMELINE */
+  .timeline { margin: 0; padding: 0; }
+  .tl-item { display: flex; gap: 12px; margin-bottom: 16px; }
+  .tl-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--purple); flex-shrink: 0; margin-top: 4px; }
+  .tl-content { flex: 1; }
+  .tl-label { font-size: 12px; font-weight: 700; color: var(--purple); margin-bottom: 4px; }
+  .tl-value { font-size: 14px; color: var(--text); }
+
+  /* PROGRESS BAR - Intentos contacto */
+  .contact-track { display: flex; gap: 6px; margin-bottom: 8px; }
+  .contact-dot { flex: 1; height: 8px; border-radius: 4px; background: var(--border); transition: background 0.2s; }
+  .contact-dot.done { background: var(--purple); }
+
+  .score-box { background: linear-gradient(135deg, var(--purple-dark), var(--purple)); color: white; border-radius: var(--radius); padding: 16px; text-align: center; margin: 12px 0; box-shadow: 0 4px 20px rgba(90,45,122,0.25); }
+  .result-badge { display: inline-block; font-size: 15px; font-weight: 800; padding: 8px 20px; border-radius: 30px; margin-top: 8px; }
+
+  .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.18s; margin-bottom: 10px; }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary  { background: var(--purple); color: white; }
+  .btn-secondary{ background: var(--navy); color: white; }
+  .btn-accent   { background: var(--gold); color: var(--navy-dark); }
+  .btn-outline  { background: transparent; color: var(--purple); border: 2px solid var(--purple); }
+  .btn-success  { background: var(--green); color: white; }
+
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); display: flex; gap: 10px; padding: 12px 16px; box-shadow: 0 -4px 16px rgba(0,0,0,0.08); z-index: 100; }
+  .bottom-nav .btn { margin: 0; }
+
+  .alert { padding: 12px 14px; border-radius: 9px; font-size: 13px; margin-bottom: 12px; line-height: 1.5; font-weight: 500; }
+  .alert-warning { background: #fff3cd; border: 1px solid #f5b840; color: #7a4f00; }
+  .alert-info    { background: #d1ecf1; border: 1px solid #0d7c8f; color: #0a4a55; }
+  .alert-success { background: #d4edda; border: 1px solid #2a8a4a; color: #155724; }
+  .alert-danger  { background: #f8d7da; border: 1px solid #c0392b; color: #721c24; }
+
+  .record-item { background: white; border-radius: 10px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .record-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .record-id { font-size: 13px; font-weight: 700; color: var(--navy); }
+  .record-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .badge-comp  { background: #d4edda; color: #155724; }
+  .badge-perd  { background: #f8d7da; color: #721c24; }
+  .badge-pend  { background: #fff3cd; color: #7a4f00; }
+  .record-detail { font-size: 12px; color: var(--muted); }
+  .record-score  { font-size: 13px; font-weight: 700; color: var(--purple); margin-top: 4px; }
+
+  .sep { height: 1px; background: var(--border); margin: 14px 0; }
+  .nav-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .nav-tab { flex: 1; padding: 8px; border: 1.5px solid var(--border); border-radius: 8px; background: white; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; text-align: center; transition: all 0.15s; }
+  .nav-tab.active { background: var(--purple); color: white; border-color: var(--purple); }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .install-banner { background: linear-gradient(135deg, #e8d5f5, #d0b8e8); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN OVERLAY ──────────────────────────────────────────── -->
+<div id="loginOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,37,64,0.97);z-index:9999;flex-direction:column;align-items:center;justify-content:center;padding:24px;">
+  <div style="width:100%;max-width:420px;background:white;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.4);">
+    <div style="background:linear-gradient(135deg,#0f2540,#1a3a5c);padding:22px 20px 18px;">
+      <div style="font-size:11px;font-weight:800;color:#f5b840;letter-spacing:1px;margin-bottom:6px;">ESTUDIO ALTOQUE vs. BEFAST 2026</div>
+      <div style="font-size:20px;font-weight:700;color:white;">Identificación del evaluador</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:4px;">Hospital Lima Este Vitarte · Solo necesitas hacerlo una vez en este dispositivo</div>
+    </div>
+    <div style="padding:20px;">
+      <label style="font-size:13px;font-weight:600;color:#1a2535;display:block;margin-bottom:5px;">Correo Gmail institucional o personal</label>
+      <input type="email" id="loginEmail" placeholder="tucorreo@gmail.com"
+        style="width:100%;padding:12px 14px;border:1.5px solid #d0dce8;border-radius:8px;font-size:15px;margin-bottom:14px;outline:none;box-sizing:border-box;">
+
+      <label style="font-size:13px;font-weight:600;color:#1a2535;display:block;margin-bottom:5px;">Nombre completo</label>
+      <input type="text" id="loginName" placeholder="Dr. / Dra. Apellido Nombre"
+        style="width:100%;padding:12px 14px;border:1.5px solid #d0dce8;border-radius:8px;font-size:15px;margin-bottom:14px;outline:none;box-sizing:border-box;">
+
+      <label style="font-size:13px;font-weight:600;color:#1a2535;display:block;margin-bottom:5px;">Rol en el estudio</label>
+      <select id="loginRole"
+        style="width:100%;padding:12px 14px;border:1.5px solid #d0dce8;border-radius:8px;font-size:15px;margin-bottom:6px;outline:none;background:#f8fafc;box-sizing:border-box;appearance:none;">
+        <option value="">Seleccionar...</option>
+        <option value="EVALT">Evaluador ALTOQUE</option>
+        <option value="EVBEF">Evaluador BEFAST</option>
+        <option value="NEU">Neurólogo consultor</option>
+        <option value="COORD" selected>Coordinador de datos</option>
+        <option value="IP">Investigador Principal</option>
+      </select>
+
+      <div id="loginError" style="font-size:12px;color:#c0392b;min-height:18px;margin-bottom:10px;font-weight:600;"></div>
+
+      <button onclick="submitLogin()"
+        style="width:100%;padding:14px;background:linear-gradient(135deg,#1a3a5c,#0d7c8f);color:white;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;">
+        ✓ Confirmar identidad y continuar
+      </button>
+
+      <div style="font-size:11px;color:#5a6a7e;text-align:center;margin-top:12px;line-height:1.5;">
+        Tu correo se guarda solo en este dispositivo.<br>No se comparte con terceros ni se usa para marketing.
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="header">
+  <div class="header-top">
+    <span class="header-badge">SEG-01</span>
+    <h1>Seguimiento 48-72 h</h1>
+  </div>
+  <div class="header-sub">Hospital Lima Este Vitarte · Coordinador de datos · ALTOQUE vs. BEFAST 2026<div id="userBadge" style="margin-top:6px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;"></div>
+  <div class="step-bar" id="stepBar">
+    <div class="step-dot" id="dot0"></div>
+    <div class="step-dot" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+  </div>
+</div>
+
+<!-- ══════════ PANTALLA 0: INICIO ══════════ -->
+<div class="screen active" id="screen0">
+  <div id="installBanner" class="install-banner" style="display:none;">
+    <div style="font-size:28px">📲</div>
+    <div><strong style="font-size:14px;color:#3a1d5a">Instalar en tu teléfono</strong><br><span style="font-size:12px;color:#5a2d7a">Toca el botón de abajo para añadir</span></div>
+  </div>
+
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab('tabNuevo','tabRegistros',this)">+ Nuevo seguimiento</div>
+    <div class="nav-tab" onclick="switchTab('tabRegistros','tabNuevo',this)">📋 Mis registros</div>
+  </div>
+
+  <div id="tabNuevo">
+    <div class="alert alert-info">
+      <strong>Coordinador de datos:</strong> Complete este formulario 48-72 h después de la evaluación inicial. Revisar historia clínica + contacto telefónico si el paciente fue dado de alta.
+    </div>
+    <div class="card">
+      <div class="card-title">Identificación del caso</div>
+      <label>ID del Paciente (formato ALTO-2026-NNN)</label>
+      <input type="text" id="s0_id" placeholder="ALTO-2026-001" oninput="this.value=this.value.toUpperCase()">
+      <div class="row2">
+        <div><label>Fecha seguimiento</label><input type="date" id="s0_fecha_seg"></div>
+        <div><label>Hora contacto</label><input type="time" id="s0_hora_contacto"></div>
+      </div>
+      <div class="row2">
+        <div><label>Fecha evaluación inicial</label><input type="date" id="s0_fecha_eval_ini"></div>
+        <div><label>Horas desde evaluación</label><input type="number" id="s0_horas_desde" placeholder="ej. 52"></div>
+      </div>
+      <label>Coordinador de datos (código)</label>
+      <input type="text" id="s0_coordinador" placeholder="ej. COORD-01">
+    </div>
+    <button class="btn btn-primary" onclick="goToScreen(1)">Continuar → Estado del paciente</button>
+  </div>
+
+  <div id="tabRegistros" style="display:none;">
+    <div id="recordsList"></div>
+    <div class="sep"></div>
+    <button class="btn btn-accent" onclick="exportCSV()">⬇ Exportar todos (CSV)</button>
+    <button class="btn btn-outline" onclick="importCSV()">⬆ Importar CSV</button>
+    <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleImport(event)">
+  </div>
+</div>
+
+<!-- ══════════ PANTALLA 1: ESTADO DEL PACIENTE ══════════ -->
+<div class="screen" id="screen1">
+  <div class="card">
+    <div class="card-title">Estado hospitalario</div>
+    <label>Situación del paciente a las 48-72 h</label>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="sit_hosp"  onclick="selectToggle('sit','hosp','sel-hosp')">Hospitalizado</div>
+      <div class="toggle-btn" id="sit_alta"  onclick="selectToggle('sit','alta','sel-alta')">Alta hospitalaria</div>
+      <div class="toggle-btn" id="sit_uci"   onclick="selectToggle('sit','uci','sel-uci')">UCI / Intensivo</div>
+      <div class="toggle-btn" id="sit_fall"  onclick="selectToggle('sit','fall','sel-fall')">Fallecido</div>
+    </div>
+
+    <label>Modo de seguimiento</label>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="modo_pres" onclick="selectToggle('modo','pres','sel-pres')">Presencial (HCE)</div>
+      <div class="toggle-btn" id="modo_tel"  onclick="selectToggle('modo','tel','sel-tel')">Telefónico</div>
+    </div>
+
+    <label>Diagnóstico de egreso / evolutivo</label>
+    <select id="s1_dx_egreso">
+      <option value="">Seleccionar...</option>
+      <option>Ictus isquémico confirmado</option>
+      <option>Ictus hemorrágico confirmado</option>
+      <option>AIT confirmado</option>
+      <option>Imitador — vértigo periférico</option>
+      <option>Imitador — hipoglucemia</option>
+      <option>Imitador — crisis epiléptica postictal</option>
+      <option>Imitador — síncope vasovagal</option>
+      <option>Imitador — migraña hemipléjica</option>
+      <option>Imitador — otro</option>
+      <option>No determinado</option>
+    </select>
+
+    <label>¿Hubo cambio de diagnóstico respecto a la impresión inicial?</label>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="cambio_no"  onclick="selectToggle('cambio','no','sel-yes')">No — diagnóstico estable</div>
+      <div class="toggle-btn" id="cambio_si"  onclick="selectToggle('cambio','si','sel-no')">Sí — diagnóstico cambió</div>
+    </div>
+    <label>Detalle del cambio (si aplica)</label>
+    <textarea id="s1_detalle_cambio" placeholder="ej. Inicialmente sospecha de ictus; finalmente: vértigo central por RM-DWI negativa y mejoría espontánea..."></textarea>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Consentimiento informado — estado</div>
+    <label>Estado del consentimiento</label>
+    <select id="s1_consentimiento">
+      <option value="">—</option>
+      <option>Obtenido — vía directa (CI-01)</option>
+      <option>Obtenido — vía subrogada (CI-02)</option>
+      <option>Obtenido — vía diferida (CI-03)</option>
+      <option>Ratificado por paciente recuperado (CI-04)</option>
+      <option>No obtenido — datos a destruir</option>
+      <option>Retirado — paciente solicitó exclusión</option>
+    </select>
+    <label>¿Datos a destruir?</label>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="dest_no" onclick="selectToggle('dest','no','sel-yes')">No — caso incluido</div>
+      <div class="toggle-btn" id="dest_si" onclick="selectToggle('dest','si','sel-no')">Sí — destrucción programada</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PANTALLA 2: CONTACTO TELEFÓNICO ══════════ -->
+<div class="screen" id="screen2">
+  <div class="card">
+    <div class="card-title">Registro de intentos de contacto telefónico</div>
+    <div class="hint">Obligatorio si el paciente fue dado de alta antes de las 48 h. Mínimo 3 intentos documentados.</div>
+
+    <label>Intento 1</label>
+    <div class="row2">
+      <div><label style="font-weight:400;font-size:12px">Fecha</label><input type="date" id="tel1_fecha"></div>
+      <div><label style="font-weight:400;font-size:12px">Hora</label><input type="time" id="tel1_hora"></div>
+    </div>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="tel1_res_suc" onclick="selectToggle('tel1_res','suc','sel-yes')">✓ Contactado</div>
+      <div class="toggle-btn" id="tel1_res_no"  onclick="selectToggle('tel1_res','no','sel-no')">✗ Sin respuesta</div>
+      <div class="toggle-btn" id="tel1_res_na"  onclick="selectToggle('tel1_res','na','sel-nd')">N/A</div>
+    </div>
+
+    <label>Intento 2</label>
+    <div class="row2">
+      <div><label style="font-weight:400;font-size:12px">Fecha</label><input type="date" id="tel2_fecha"></div>
+      <div><label style="font-weight:400;font-size:12px">Hora</label><input type="time" id="tel2_hora"></div>
+    </div>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="tel2_res_suc" onclick="selectToggle('tel2_res','suc','sel-yes')">✓ Contactado</div>
+      <div class="toggle-btn" id="tel2_res_no"  onclick="selectToggle('tel2_res','no','sel-no')">✗ Sin respuesta</div>
+      <div class="toggle-btn" id="tel2_res_na"  onclick="selectToggle('tel2_res','na','sel-nd')">N/A</div>
+    </div>
+
+    <label>Intento 3</label>
+    <div class="row2">
+      <div><label style="font-weight:400;font-size:12px">Fecha</label><input type="date" id="tel3_fecha"></div>
+      <div><label style="font-weight:400;font-size:12px">Hora</label><input type="time" id="tel3_hora"></div>
+    </div>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="tel3_res_suc" onclick="selectToggle('tel3_res','suc','sel-yes')">✓ Contactado</div>
+      <div class="toggle-btn" id="tel3_res_no"  onclick="selectToggle('tel3_res','no','sel-no')">✗ Sin respuesta</div>
+      <div class="toggle-btn" id="tel3_res_na"  onclick="selectToggle('tel3_res','na','sel-nd')">N/A</div>
+    </div>
+
+    <div id="contactDots" class="contact-track">
+      <div class="contact-dot" id="cdot1"></div>
+      <div class="contact-dot" id="cdot2"></div>
+      <div class="contact-dot" id="cdot3"></div>
+    </div>
+
+    <label>Resultado del seguimiento telefónico</label>
+    <select id="s2_result_tel">
+      <option value="">—</option>
+      <option>Paciente contactado — información obtenida</option>
+      <option>Familiar contactado — información obtenida</option>
+      <option>Sin respuesta en 3 intentos — caso: pérdida en seguimiento</option>
+      <option>No aplica — seguimiento presencial</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Estado neurológico al seguimiento</div>
+    <div class="row2">
+      <div>
+        <label>Escala Rankin modificada (mRS)</label>
+        <select id="s2_mrs">
+          <option value="">—</option>
+          <option value="0">0 — Sin síntomas</option>
+          <option value="1">1 — Sin discapacidad significativa</option>
+          <option value="2">2 — Discapacidad leve</option>
+          <option value="3">3 — Discapacidad moderada</option>
+          <option value="4">4 — Discapacidad moderada-severa</option>
+          <option value="5">5 — Discapacidad severa</option>
+          <option value="6">6 — Fallecido</option>
+        </select>
+      </div>
+      <div>
+        <label>¿Resolución de síntomas?</label>
+        <select id="s2_resolucion">
+          <option value="">—</option>
+          <option>Completa</option>
+          <option>Parcial</option>
+          <option>Sin mejoría</option>
+          <option>Deterioro</option>
+          <option>No evaluable</option>
+        </select>
+      </div>
+    </div>
+    <label>Observaciones clínicas al seguimiento</label>
+    <textarea id="s2_obs_clinicas" placeholder="Evolución, tratamiento recibido, complicaciones, pendientes..."></textarea>
+  </div>
+</div>
+
+<!-- ══════════ PANTALLA 3: CIERRE Y ESTADO ══════════ -->
+<div class="screen" id="screen3">
+  <div class="card">
+    <div class="card-title">Clasificación final del caso</div>
+    <label>Diagnóstico definitivo para el estudio</label>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="class_ictus" onclick="selectToggle('class','ictus','sel-ictus')">Ictus</div>
+      <div class="toggle-btn" id="class_ait"   onclick="selectToggle('class','ait','sel-ait')">AIT</div>
+      <div class="toggle-btn" id="class_mimic" onclick="selectToggle('class','mimic','sel-mimic')">Imitador</div>
+      <div class="toggle-btn" id="class_nd"    onclick="selectToggle('class','nd','sel-nd')">No determinado</div>
+    </div>
+
+    <label>Estado del caso para el análisis estadístico</label>
+    <select id="s3_estado_analisis">
+      <option value="">Seleccionar...</option>
+      <option>Incluido — datos completos</option>
+      <option>Incluido — datos parciales (análisis sensibilidad)</option>
+      <option>Excluido — pérdida en seguimiento</option>
+      <option>Excluido — retiro de consentimiento</option>
+      <option>Excluido — datos a destruir</option>
+      <option>Excluido — criterio exclusión detectado post-reclutamiento</option>
+    </select>
+
+    <label>¿Neuroimagen completa?</label>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="img_si" onclick="selectToggle('img','si','sel-yes')">✓ Sí</div>
+      <div class="toggle-btn" id="img_no" onclick="selectToggle('img','no','sel-no')">✗ No</div>
+    </div>
+    <label>Motivo si neuroimagen incompleta</label>
+    <input type="text" id="s3_motivo_img" placeholder="ej. rechazo del paciente, equipo no disponible...">
+
+    <label>Notas finales del coordinador</label>
+    <textarea id="s3_notas_coord" placeholder="Cualquier incidencia relevante para el seguimiento o el análisis estadístico..."></textarea>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Cierre del registro</div>
+    <div class="row2">
+      <div>
+        <label>Estado formulario SEG-01</label>
+        <select id="s3_estado_seg">
+          <option value="Pendiente">Pendiente — incompleto</option>
+          <option value="Completado">Completado — listo para adjudicación</option>
+          <option value="Cerrado">Cerrado — adjudicado</option>
+        </select>
+      </div>
+      <div>
+        <label>Hora cierre</label>
+        <input type="time" id="s3_hora_cierre">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PANTALLA 4: CONFIRMACIÓN ══════════ -->
+<div class="screen" id="screen4">
+  <div class="alert alert-success">✅ Seguimiento guardado correctamente.</div>
+  <div class="card"><div class="card-title">Resumen del seguimiento</div><div id="summaryContent"></div></div>
+  <button class="btn btn-accent" onclick="exportSingleCSV()">⬇ Exportar este registro (CSV)</button>
+  <button class="btn btn-secondary" onclick="window.print()">🖨 Imprimir</button>
+  <button class="btn btn-outline" onclick="newRecord()">+ Nuevo seguimiento</button>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav" id="bottomNav">
+  <button class="btn btn-outline" id="btnBack" onclick="goBack()" style="display:none;">← Atrás</button>
+  <button class="btn btn-primary" id="btnNext" onclick="goNext()">Continuar →</button>
+</div>
+<button class="btn btn-accent" id="installBtn" style="display:none;position:fixed;bottom:80px;left:16px;right:16px;z-index:200;" onclick="installApp()">📲 Instalar en mi teléfono</button>
+
+<script>
+
+
+// ── SISTEMA DE IDENTIFICACIÓN POR GMAIL ────────────────────────────────
+const STORAGE_KEY_USER = 'seg_study_user';
+
+function loadUser() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY_USER) || 'null'); }
+  catch(e) { return null; }
+}
+function saveUser(u) { localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(u)); }
+function clearUser() { localStorage.removeItem(STORAGE_KEY_USER); }
+
+function isValidGmail(email) {
+  return /^[^\s@]+@gmail\.com$/i.test(email.trim());
+}
+function generateCode(role, email) {
+  const initials = email.split('@')[0].replace(/[^a-zA-Z]/g,'').toUpperCase().slice(0,3);
+  return role + '-' + initials;
+}
+function showLoginScreen() {
+  const el = document.getElementById('loginOverlay');
+  if (el) el.style.display = 'flex';
+}
+function hideLoginScreen() {
+  const el = document.getElementById('loginOverlay');
+  if (el) el.style.display = 'none';
+}
+function submitLogin() {
+  const email = (document.getElementById('loginEmail')||{}).value||'';
+  const name  = (document.getElementById('loginName')||{}).value||'';
+  const role  = (document.getElementById('loginRole')||{}).value||'';
+  const err   = document.getElementById('loginError');
+
+  if (!isValidGmail(email.trim())) {
+    if(err) err.textContent = '⚠ Ingresa un correo Gmail válido (@gmail.com)';
+    return;
+  }
+  if (name.trim().length < 4) {
+    if(err) err.textContent = '⚠ Ingresa tu nombre completo';
+    return;
+  }
+  if (!role) {
+    if(err) err.textContent = '⚠ Selecciona tu rol en el estudio';
+    return;
+  }
+  if(err) err.textContent = '';
+
+  const user = {
+    email: email.trim(),
+    name:  name.trim(),
+    role,
+    code:  generateCode(role, email.trim()),
+    registeredAt: new Date().toISOString()
+  };
+  saveUser(user);
+  // También guardar en clave maestra del portal
+  localStorage.setItem('hlev_study_user_2026', JSON.stringify(user));
+  applyUserToForm(user);
+  hideLoginScreen();
+}
+function applyUserToForm(user) {
+  // Rellenar campos de evaluador automáticamente (solo lectura)
+  const fieldMap = {
+    's0_evaluador':         user.code,
+    'ev_codigo':            user.code,
+    'ev_nombre':            user.name,
+    's0_neurologo_codigo':  user.code,
+    's0_neurologo_nombre':  user.name,
+    's0_coordinador':       user.code,
+  };
+  Object.entries(fieldMap).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.value    = val;
+      el.readOnly = true;
+      el.style.background  = '#f0f8f0';
+      el.style.color       = '#1a4a1a';
+      el.style.fontWeight  = '600';
+    }
+  });
+  // Mostrar badge de usuario en el header
+  const badge = document.getElementById('userBadge');
+  if (badge) {
+    badge.innerHTML =
+      `<span style="font-size:11px;opacity:0.9">👤 ${user.name}</span>` +
+      `<span style="font-size:10px;opacity:0.7;margin-left:6px">${user.code}</span>` +
+      `<button onclick="logoutUser()" style="background:rgba(255,255,255,0.2);border:none;` +
+      `color:white;font-size:10px;padding:2px 8px;border-radius:4px;margin-left:8px;cursor:pointer;">` +
+      `Cambiar</button>`;
+  }
+}
+function logoutUser() {
+  if (!confirm('¿Cambiar de usuario?\n\nLos registros ya guardados NO se borran.')) return;
+  clearUser();
+  location.reload();
+}
+function loadPortalSession() {
+  const keys = ['hlev_study_user_2026', 'seg_study_user'];
+  for (const key of keys) {
+    try {
+      const data = localStorage.getItem(key);
+      if (data) {
+        const user = JSON.parse(data);
+        if (user && user.email && user.name && user.code) return user;
+      }
+    } catch(e) {}
+  }
+  return null;
+}
+
+// ── CONFIGURACIÓN GOOGLE SHEETS ──────────────────────────────────────
+// ▼ PEGAR AQUÍ LA URL QUE GENERA GOOGLE APPS SCRIPT (termina en /exec) ▼
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyzvGrCJ47xSH3SXAdsAGwcM81AoQQii3PEqogjhaEIoCGHGP7q3hjDp-hAQXHl5CrT/exec";
+const SOURCE = "seguimiento";
+
+async function syncToSheets(record) {
+  if (!WEBHOOK_URL || WEBHOOK_URL.includes("PEGAR_AQUI")) return { ok: false, error: "noconfig" };
+  try {
+    const r = await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source: SOURCE, record })
+    });
+    return await r.json();
+  } catch(e) { return { ok: false, error: "offline" }; }
+}
+function showSyncBadge(status) {
+  const el = document.getElementById("syncBadge");
+  if (!el) return;
+  const cfg = {
+    syncing: ["⏳ Sincronizando con Google Sheets…", "#FFF3CD", "#7A4F00"],
+    ok:      ["☁️ Guardado en Google Sheets ✓",       "#D4EDDA", "#155724"],
+    offline: ["📱 Sin internet — guardado solo en este dispositivo", "#F8D7DA", "#721C24"],
+    noconfig:["⚙️ Configura el WEBHOOK_URL para activar Google Sheets", "#FFF3CD", "#7A4F00"],
+  };
+  const [text, bg, color] = cfg[status] || cfg.offline;
+  el.innerHTML = `<div style="padding:10px 14px;border-radius:8px;background:${bg};color:${color};font-size:13px;font-weight:600;margin-top:10px;">${text}</div>`;
+}
+
+let currentScreen = 0;
+let toggleState = {};
+let deferredPrompt = null;
+let records = JSON.parse(localStorage.getItem('seg_records') || '[]');
+
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt=e; document.getElementById('installBtn').style.display='block'; document.getElementById('installBanner').style.display='flex'; });
+async function installApp() {
+  if (!deferredPrompt) { alert('iPhone/iPad: Compartir (⬆) → "Añadir a inicio"\nAndroid: ⋮ → "Instalar aplicación"'); return; }
+  deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null;
+  document.getElementById('installBtn').style.display='none';
+}
+
+function goToScreen(n) {
+  if (!validateScreen(currentScreen)) return;
+  document.getElementById('screen'+currentScreen).classList.remove('active');
+  currentScreen=n;
+  document.getElementById('screen'+n).classList.add('active');
+  updateNav(); updateStepBar(); window.scrollTo(0,0);
+}
+function goNext() { if (currentScreen<3) goToScreen(currentScreen+1); else saveRecord(); }
+function goBack() { if (currentScreen>0) goToScreen(currentScreen-1); }
+function updateNav() {
+  document.getElementById('btnBack').style.display = currentScreen>0?'block':'none';
+  const btn=document.getElementById('btnNext');
+  if (currentScreen===3) { btn.textContent='💾 Guardar seguimiento'; btn.className='btn btn-success'; }
+  else { btn.textContent='Continuar →'; btn.className='btn btn-primary'; }
+  document.getElementById('bottomNav').style.display = currentScreen===4?'none':'flex';
+}
+function updateStepBar() {
+  for(let i=0;i<4;i++){
+    const d=document.getElementById('dot'+i);
+    d.className='step-dot'+(i<currentScreen?' done':i===currentScreen?' active':'');
+  }
+}
+function validateScreen(n) {
+  if(n===0&&!document.getElementById('s0_id').value.trim()){alert('Ingrese el ID del paciente');return false;}
+  return true;
+}
+function switchTab(showId,hideId,el){
+  document.getElementById(showId).style.display='block';
+  document.getElementById(hideId).style.display='none';
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  if(showId==='tabRegistros') renderRecords();
+}
+function selectToggle(group,val,cls){
+  toggleState[group]=val;
+  document.querySelectorAll(`[id^="${group}_"]`).forEach(btn=>{ btn.className='toggle-btn'; });
+  const el=document.getElementById(`${group}_${val}`);
+  if(el) el.className=`toggle-btn ${cls}`;
+  // update contact dots
+  if(group.startsWith('tel')&&group.endsWith('res')) updateContactDots();
+}
+function updateContactDots(){
+  ['1','2','3'].forEach(n=>{
+    const dot=document.getElementById('cdot'+n);
+    const val=toggleState['tel'+n+'_res'];
+    if(val==='suc') dot.style.background='#2a8a4a';
+    else if(val==='no') dot.style.background='#e74c3c';
+    else if(val==='na') dot.style.background='#95a5a6';
+    else dot.style.background='';
+    dot.className='contact-dot'+(val?(' done'):'');
+  });
+}
+
+function getV(id){const el=document.getElementById(id);return el?el.value:'';}
+
+function saveRecord(){
+  const record={
+    id:getV('s0_id').trim(), fecha_seg:getV('s0_fecha_seg'), hora_contacto:getV('s0_hora_contacto'),
+    fecha_eval_ini:getV('s0_fecha_eval_ini'), horas_desde:getV('s0_horas_desde'),
+    coordinador:getV('s0_coordinador'),
+    situacion:toggleState.sit||'', modo_seguimiento:toggleState.modo||'',
+    dx_egreso:getV('s1_dx_egreso'), cambio_dx:toggleState.cambio||'',
+    detalle_cambio:getV('s1_detalle_cambio'),
+    consentimiento:getV('s1_consentimiento'), datos_destruir:toggleState.dest||'',
+    tel1_fecha:getV('tel1_fecha'), tel1_hora:getV('tel1_hora'), tel1_res:toggleState.tel1_res||'',
+    tel2_fecha:getV('tel2_fecha'), tel2_hora:getV('tel2_hora'), tel2_res:toggleState.tel2_res||'',
+    tel3_fecha:getV('tel3_fecha'), tel3_hora:getV('tel3_hora'), tel3_res:toggleState.tel3_res||'',
+    result_tel:getV('s2_result_tel'),
+    mrs:getV('s2_mrs'), resolucion:getV('s2_resolucion'), obs_clinicas:getV('s2_obs_clinicas'),
+    clasificacion_final:toggleState.class||'',
+    estado_analisis:getV('s3_estado_analisis'),
+    img_completa:toggleState.img||'', motivo_img:getV('s3_motivo_img'),
+    notas_coord:getV('s3_notas_coord'),
+    estado_seg:getV('s3_estado_seg'), hora_cierre:getV('s3_hora_cierre'),
+    timestamp:new Date().toISOString()
+  };
+  records.push(record);
+  localStorage.setItem('seg_records',JSON.stringify(records));
+  showSummary(record);
+  goToScreen(4);
+}
+
+function showSummary(r){
+  const clsColor=r.clasificacion_final==='ictus'?'#2a6a8a':r.clasificacion_final==='mimic'?'#8a6a1a':r.clasificacion_final==='ait'?'#6a2a7a':'#5a5a5a';
+  document.getElementById('summaryContent').innerHTML=`
+    <div style="margin-bottom:8px"><strong>Paciente:</strong> ${r.id} &nbsp;|&nbsp; <strong>Seguimiento:</strong> ${r.fecha_seg} (${r.horas_desde}h post-eval)</div>
+    <div style="margin-bottom:8px"><strong>Situación:</strong> ${r.situacion||'—'} &nbsp;|&nbsp; <strong>Modo:</strong> ${r.modo_seguimiento||'—'}</div>
+    <div style="margin-bottom:8px"><strong>Dx egreso:</strong> ${r.dx_egreso||'—'}</div>
+    <div style="margin-bottom:8px"><strong>mRS:</strong> ${r.mrs||'—'} &nbsp;|&nbsp; <strong>Resolución:</strong> ${r.resolucion||'—'}</div>
+    <div style="margin-bottom:8px"><strong>Consentimiento:</strong> ${r.consentimiento||'—'}</div>
+    <div style="margin-bottom:8px"><strong>Estado análisis:</strong> ${r.estado_analisis||'—'}</div>
+    <div style="text-align:center;margin-top:12px">
+      <span style="background:${clsColor};color:white;padding:8px 22px;border-radius:20px;font-weight:800;font-size:15px">${r.clasificacion_final||'Pendiente'}</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);text-align:center">Estado SEG-01: ${r.estado_seg}</div>
+  `;
+}
+
+function renderRecords(){
+  const el=document.getElementById('recordsList');
+  if(!records.length){el.innerHTML='<div class="empty-state"><div class="icon">📞</div><p>No hay seguimientos aún.</p></div>';return;}
+  el.innerHTML=records.map((r,origIdx)=>({r,origIdx})).slice().reverse().map(({r,origIdx})=>`
+    <div class="record-item">
+      <div class="record-header">
+        <div class="record-id">${r.id}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="record-badge ${r.estado_seg==='Cerrado'?'badge-comp':r.estado_seg==='Pendiente'?'badge-pend':'badge-pend'}">${r.estado_seg}</div>
+          <button onclick="deleteRecord(${origIdx})" style="background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:6px;font-size:18px;color:#c0392b;">🗑</button>
+        </div>
+      </div>
+      <div class="record-detail">${r.fecha_seg} · ${r.horas_desde}h · ${r.coordinador}</div>
+      <div class="record-score">${r.clasificacion_final||'Pendiente'} &nbsp;|&nbsp; mRS: ${r.mrs||'—'} &nbsp;|&nbsp; ${r.dx_egreso||'—'}</div>
+    </div>`).join('');
+}
+
+function deleteRecord(origIdx){
+  const r=records[origIdx]; if(!r) return;
+  if(!confirm(`¿Eliminar seguimiento de ${r.id} del ${r.fecha_seg}?\n\nEsta acción no se puede deshacer.`)) return;
+  records.splice(origIdx,1);
+  localStorage.setItem('seg_records',JSON.stringify(records));
+  renderRecords();
+}
+
+const CSV_HEADERS=[
+  'ID_Paciente','Fecha_Seguimiento','Hora_Contacto','Fecha_Eval_Inicial','Horas_Desde_Eval','Coordinador',
+  'Situacion_Paciente','Modo_Seguimiento','Dx_Egreso','Cambio_Dx','Detalle_Cambio',
+  'Estado_Consentimiento','Datos_A_Destruir',
+  'Tel1_Fecha','Tel1_Hora','Tel1_Resultado','Tel2_Fecha','Tel2_Hora','Tel2_Resultado','Tel3_Fecha','Tel3_Hora','Tel3_Resultado',
+  'Resultado_Seguimiento_Tel',
+  'mRS_Seguimiento','Resolucion_Sintomas','Obs_Clinicas',
+  'Clasificacion_Final_Estudio','Estado_Para_Analisis','Neuroimagen_Completa','Motivo_Img_Incompleta',
+  'Notas_Coordinador','Estado_SEG01','Hora_Cierre','Timestamp'
+];
+function recordToRow(r){
+  const v=x=>(x===null||x===undefined)?'':String(x).replace(/,/g,';').replace(/\n/g,' ');
+  return[
+    v(r.id),v(r.fecha_seg),v(r.hora_contacto),v(r.fecha_eval_ini),v(r.horas_desde),v(r.coordinador),
+    v(r.situacion),v(r.modo_seguimiento),v(r.dx_egreso),v(r.cambio_dx),v(r.detalle_cambio),
+    v(r.consentimiento),v(r.datos_destruir),
+    v(r.tel1_fecha),v(r.tel1_hora),v(r.tel1_res),v(r.tel2_fecha),v(r.tel2_hora),v(r.tel2_res),v(r.tel3_fecha),v(r.tel3_hora),v(r.tel3_res),
+    v(r.result_tel),
+    v(r.mrs),v(r.resolucion),v(r.obs_clinicas),
+    v(r.clasificacion_final),v(r.estado_analisis),v(r.img_completa),v(r.motivo_img),
+    v(r.notas_coord),v(r.estado_seg),v(r.hora_cierre),v(r.timestamp)
+  ].join(',');
+}
+function exportCSV(){if(!records.length){alert('No hay registros.');return;}downloadBlob([CSV_HEADERS.join(','),...records.map(recordToRow)].join('\n'),`SEG_BD_${today()}.csv`);}
+function exportSingleCSV(){const r=records[records.length-1];downloadBlob([CSV_HEADERS.join(','),recordToRow(r)].join('\n'),`SEG_${r.id}_${today()}.csv`);}
+function downloadBlob(content,filename){const blob=new Blob(['\uFEFF'+content],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);}
+function today(){return new Date().toISOString().slice(0,10).replace(/-/g,'');}
+function importCSV(){document.getElementById('csvFileInput').click();}
+function handleImport(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const lines=ev.target.result.replace(/\uFEFF/,'').split('\n').filter(l=>l.trim());
+    if(lines.length<2){alert('CSV vacío.');return;}
+    const headers=lines[0].split(',');
+    let imported=0;
+    for(let i=1;i<lines.length;i++){
+      const vals=lines[i].split(',');
+      const obj={};headers.forEach((h,j)=>obj[h.trim()]=vals[j]||'');
+      const rec={
+        id:obj.ID_Paciente,fecha_seg:obj.Fecha_Seguimiento,hora_contacto:obj.Hora_Contacto,
+        fecha_eval_ini:obj.Fecha_Eval_Inicial,horas_desde:obj.Horas_Desde_Eval,coordinador:obj.Coordinador,
+        situacion:obj.Situacion_Paciente,modo_seguimiento:obj.Modo_Seguimiento,
+        dx_egreso:obj.Dx_Egreso,cambio_dx:obj.Cambio_Dx,detalle_cambio:obj.Detalle_Cambio,
+        consentimiento:obj.Estado_Consentimiento,datos_destruir:obj.Datos_A_Destruir,
+        tel1_fecha:obj.Tel1_Fecha,tel1_hora:obj.Tel1_Hora,tel1_res:obj.Tel1_Resultado,
+        tel2_fecha:obj.Tel2_Fecha,tel2_hora:obj.Tel2_Hora,tel2_res:obj.Tel2_Resultado,
+        tel3_fecha:obj.Tel3_Fecha,tel3_hora:obj.Tel3_Hora,tel3_res:obj.Tel3_Resultado,
+        result_tel:obj.Resultado_Seguimiento_Tel,
+        mrs:obj.mRS_Seguimiento,resolucion:obj.Resolucion_Sintomas,obs_clinicas:obj.Obs_Clinicas,
+        clasificacion_final:obj.Clasificacion_Final_Estudio,estado_analisis:obj.Estado_Para_Analisis,
+        img_completa:obj.Neuroimagen_Completa,motivo_img:obj.Motivo_Img_Incompleta,
+        notas_coord:obj.Notas_Coordinador,estado_seg:obj.Estado_SEG01,
+        hora_cierre:obj.Hora_Cierre,timestamp:obj.Timestamp||new Date().toISOString()
+      };
+      if(rec.id&&!records.find(x=>x.id===rec.id&&x.timestamp===rec.timestamp)){records.push(rec);imported++;}
+    }
+    localStorage.setItem('seg_records',JSON.stringify(records));
+    alert(`✅ ${imported} registro(s) importado(s).`);
+    renderRecords();
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+function newRecord(){
+  toggleState={};
+  document.querySelectorAll('.toggle-btn').forEach(b=>b.className='toggle-btn');
+  document.querySelectorAll('input[type="text"],input[type="number"],input[type="time"],input[type="date"],select,textarea').forEach(el=>el.value='');
+  document.getElementById('s0_fecha_seg').value=new Date().toISOString().slice(0,10);
+  document.getElementById('s3_estado_seg').value='Pendiente';
+  goToScreen(0);
+}
+window.addEventListener('load',()=>{
+  document.getElementById('s0_fecha_seg').value=new Date().toISOString().slice(0,10);
+  updateNav();updateStepBar();
+});
+</script>
+</body>
+</html>
