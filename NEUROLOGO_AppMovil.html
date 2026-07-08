@@ -606,12 +606,17 @@ const SOURCE = "neurologo";
 async function syncToSheets(record) {
   if (!WEBHOOK_URL || WEBHOOK_URL.includes("PEGAR_AQUI")) return { ok: false, error: "noconfig" };
   try {
+    // Usar FormData para evitar CORS preflight que Google Apps Script bloquea
+    const formData = new FormData();
+    formData.append("source", SOURCE);
+    formData.append("record", JSON.stringify(record));
     const r = await fetch(WEBHOOK_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source: SOURCE, record })
+      body: formData
     });
-    return await r.json();
+    const text = await r.text();
+    try { return JSON.parse(text); }
+    catch(e) { return { ok: true }; }
   } catch(e) { return { ok: false, error: "offline" }; }
 }
 function showSyncBadge(status) {
