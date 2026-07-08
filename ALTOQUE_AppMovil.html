@@ -688,33 +688,51 @@ const SOURCE = "altoque";
 
 async function syncToSheets(record) {
   if (!WEBHOOK_URL || WEBHOOK_URL.includes("PEGAR_AQUI")) return { ok: false, error: "noconfig" };
-  try {
-    // Codificar datos como parámetros URL — evita CORS completamente
-    const params = new URLSearchParams({
-      source: SOURCE,
-      record: JSON.stringify(record)
-    });
-    const url = WEBHOOK_URL + "?" + params.toString();
-    
-    // Usar no-cors para evitar bloqueo del navegador
-    await fetch(url, { method: "GET", mode: "no-cors" });
-    
-    // no-cors no permite leer la respuesta, asumimos éxito si no hay excepción
-    return { ok: true };
-  } catch(e) { 
-    // Si fetch falla, intentar con Image() que nunca es bloqueado por CORS
+  return new Promise((resolve) => {
     try {
-      const params = new URLSearchParams({ source: SOURCE, record: JSON.stringify(record) });
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = img.onerror = () => resolve({ ok: true });
-        img.src = WEBHOOK_URL + "?" + params.toString();
-        setTimeout(() => resolve({ ok: true }), 3000);
-      });
-    } catch(e2) {
-      return { ok: false, error: "offline" };
+      // Crear iframe oculto para envío sin restricciones CORS
+      const iframeId = "sync_iframe_" + Date.now();
+      const formId   = "sync_form_"   + Date.now();
+
+      const iframe = document.createElement("iframe");
+      iframe.name  = iframeId;
+      iframe.id    = iframeId;
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
+
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = WEBHOOK_URL;
+      form.target = iframeId;
+      form.style.display = "none";
+
+      const addField = (name, value) => {
+        const input = document.createElement("input");
+        input.type  = "hidden";
+        input.name  = name;
+        input.value = value;
+        form.appendChild(input);
+      };
+
+      addField("source", SOURCE);
+      addField("record", JSON.stringify(record));
+
+      document.body.appendChild(form);
+      form.submit();
+
+      // Asumir éxito después de 2 segundos y limpiar
+      setTimeout(() => {
+        try {
+          document.body.removeChild(form);
+          document.body.removeChild(iframe);
+        } catch(e) {}
+        resolve({ ok: true });
+      }, 2000);
+
+    } catch(e) {
+      resolve({ ok: false, error: "offline" });
     }
-  }
+  });
 }
 function showSyncBadge(status) {
   const el = document.getElementById('syncBadge');
