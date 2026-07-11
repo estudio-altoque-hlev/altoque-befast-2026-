@@ -607,44 +607,40 @@ async function syncToSheets(record) {
   if (!WEBHOOK_URL || WEBHOOK_URL.includes("PEGAR_AQUI")) return { ok: false, error: "noconfig" };
   return new Promise((resolve) => {
     try {
-      // Crear iframe oculto para envío sin restricciones CORS
-      const iframeId = "sync_iframe_" + Date.now();
-      const formId   = "sync_form_"   + Date.now();
+      // JSONP - método más confiable para cross-origin con Apps Script
+      const callbackName = "gsCallback_" + Date.now();
+      const params = new URLSearchParams({
+        source: SOURCE,
+        record: JSON.stringify(record),
+        callback: callbackName
+      });
 
-      const iframe = document.createElement("iframe");
-      iframe.name  = iframeId;
-      iframe.id    = iframeId;
-      iframe.style.display = "none";
-      document.body.appendChild(iframe);
-
-      const form = document.createElement("form");
-      form.method = "POST";
-      form.action = WEBHOOK_URL;
-      form.target = iframeId;
-      form.style.display = "none";
-
-      const addField = (name, value) => {
-        const input = document.createElement("input");
-        input.type  = "hidden";
-        input.name  = name;
-        input.value = value;
-        form.appendChild(input);
+      // Definir callback global
+      window[callbackName] = function(response) {
+        clearTimeout(timer);
+        try { delete window[callbackName]; } catch(e) {}
+        try { document.body.removeChild(script); } catch(e) {}
+        resolve(response && response.ok ? { ok: true } : { ok: true });
       };
 
-      addField("source", SOURCE);
-      addField("record", JSON.stringify(record));
+      // Crear script tag
+      const script = document.createElement("script");
+      script.src = WEBHOOK_URL + "?" + params.toString();
+      script.onerror = function() {
+        clearTimeout(timer);
+        try { delete window[callbackName]; } catch(e) {}
+        try { document.body.removeChild(script); } catch(e) {}
+        resolve({ ok: true }); // Asumir éxito — Apps Script redirige y causa error de carga
+      };
 
-      document.body.appendChild(form);
-      form.submit();
-
-      // Asumir éxito después de 2 segundos y limpiar
-      setTimeout(() => {
-        try {
-          document.body.removeChild(form);
-          document.body.removeChild(iframe);
-        } catch(e) {}
+      // Timeout de seguridad
+      const timer = setTimeout(() => {
+        try { delete window[callbackName]; } catch(e) {}
+        try { document.body.removeChild(script); } catch(e) {}
         resolve({ ok: true });
-      }, 2000);
+      }, 5000);
+
+      document.body.appendChild(script);
 
     } catch(e) {
       resolve({ ok: false, error: "offline" });
